@@ -5,10 +5,29 @@ let pool: Pool | null = null;
 
 export function getPostgresPool(): Pool {
   if (!pool) {
-    const connectionString = process.env.DATABASE_URL;
+    let connectionString = process.env.DATABASE_URL;
     
     if (!connectionString) {
       throw new Error('DATABASE_URL is required for PostgreSQL');
+    }
+
+    // Fix: If DATABASE_URL doesn't have protocol, try to construct it
+    // This handles cases where only host:port is provided
+    if (!connectionString.startsWith('postgresql://') && !connectionString.startsWith('postgres://')) {
+      // Try to construct from parts
+      const dbUser = process.env.DB_USER || process.env.POSTGRES_USER || 'postgres';
+      const dbPassword = process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || '';
+      const dbHost = connectionString.includes(':') 
+        ? connectionString.split(':')[0] 
+        : connectionString;
+      const dbPort = connectionString.includes(':')
+        ? connectionString.split(':')[1]
+        : '5432';
+      const dbName = process.env.DB_NAME || process.env.POSTGRES_DB || 'railway';
+      
+      connectionString = `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+      
+      console.warn('⚠️  DATABASE_URL format incorrect, constructed from parts. Please use full connection string!');
     }
 
     pool = new Pool({
@@ -18,7 +37,7 @@ export function getPostgresPool(): Pool {
         : false,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000, // Increased timeout
     });
 
     pool.on('error', (err) => {
