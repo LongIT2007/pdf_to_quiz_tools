@@ -112,5 +112,33 @@ export function getDbType() {
   return dbType;
 }
 
-// For backward compatibility
-export default getDatabase();
+// For backward compatibility - lazy evaluation
+// Don't execute immediately, only when accessed
+let _defaultDb: any = null;
+
+function getDefaultDatabase() {
+  if (_defaultDb) return _defaultDb;
+  
+  if (dbType === "postgres") {
+    // For PostgreSQL, models will use getPostgresPool() directly
+    // This default export is only for SQLite
+    throw new Error(
+      "Cannot use default database export with PostgreSQL. " +
+      "Use getPostgresPool() from database-pg.ts instead."
+    );
+  }
+  
+  _defaultDb = getDatabase();
+  return _defaultDb;
+}
+
+// Export getter function that lazily loads database
+// This prevents immediate execution on import
+export default {
+  get prepare() {
+    return getDefaultDatabase().prepare.bind(getDefaultDatabase());
+  },
+  get exec() {
+    return getDefaultDatabase().exec.bind(getDefaultDatabase());
+  },
+};

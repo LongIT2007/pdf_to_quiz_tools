@@ -1,13 +1,69 @@
 // PDF Document Model
-import db from "../config/database";
+import { getDbType } from "../config/database";
 import { PDFDocument } from "../types";
 import { generatePDFId } from "../utils/id";
 
+// Get database instance
+function getDb() {
+  const dbType = getDbType();
+  
+  if (dbType === "postgres") {
+    // Import PostgreSQL pool
+    const { getPostgresPool } = require("../config/database-pg");
+    return getPostgresPool();
+  }
+  
+  // Import SQLite database
+  const { getDatabase } = require("../config/database");
+  return getDatabase();
+}
+
 export class PDFModel {
-  static create(pdfData: Omit<PDFDocument, "id" | "uploadDate">): PDFDocument {
+  static async create(pdfData: Omit<PDFDocument, "id" | "uploadDate">): Promise<PDFDocument> {
     const id = generatePDFId();
     const uploadDate = new Date();
+    const dbType = getDbType();
 
+    if (dbType === "postgres") {
+      const pool = getDb();
+      const result = await pool.query(`
+        INSERT INTO pdf_documents (
+          id, filename, original_name, file_path, file_size, mime_type,
+          upload_date, status, extracted_text, page_count, error_message
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+      `, [
+        id,
+        pdfData.filename,
+        pdfData.originalName,
+        pdfData.filePath,
+        pdfData.fileSize,
+        pdfData.mimeType,
+        uploadDate.toISOString(),
+        pdfData.status || "processing",
+        pdfData.extractedText || null,
+        pdfData.pageCount || null,
+        pdfData.errorMessage || null,
+      ]);
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        filename: row.filename,
+        originalName: row.original_name,
+        filePath: row.file_path,
+        fileSize: row.file_size,
+        mimeType: row.mime_type,
+        uploadDate: new Date(row.upload_date),
+        status: row.status,
+        extractedText: row.extracted_text,
+        pageCount: row.page_count,
+        errorMessage: row.error_message,
+      };
+    }
+
+    // SQLite path
+    const db = getDb();
     db.prepare(`
       INSERT INTO pdf_documents (
         id, filename, original_name, file_path, file_size, mime_type,
