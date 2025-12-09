@@ -19,7 +19,7 @@ function Router() {
       <Route path={"/"} component={Dashboard} />
       <Route path={"/upload"} component={UploadPDF} />
       <Route path={"/upload/smart"} component={SmartUpload} />
-      <Route path={"/quiz/create" component={CreateQuiz} />
+      <Route path={"/quiz/create"} component={CreateQuiz} />
       <Route path={"/quiz/smart-create" component={SmartCreateQuiz} />
       <Route path={"/quiz/:id">
         {(params) => <ViewQuiz params={params} />}
