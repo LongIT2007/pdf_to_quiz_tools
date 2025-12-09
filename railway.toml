@@ -1,0 +1,14 @@
+# Railway configuration file
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install && pnpm build"
+
+[deploy]
+startCommand = "pnpm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+
+[environments.production]
+variables = {
+  NODE_ENV = "production"
+}

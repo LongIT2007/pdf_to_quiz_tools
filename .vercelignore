@@ -1,0 +1,13 @@
+# Vercel ignore file
+server/
+data/
+uploads/
+*.md
+.env
+.env.local
+node_modules/
+dist/
+build/
+.git/
+.DS_Store
+*.log

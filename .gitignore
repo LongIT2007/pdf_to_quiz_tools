@@ -104,3 +104,16 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+data/
+
+# Uploaded files
+uploads/
+
+# Backend generated files
+server/dist/
+
+# Vercel
+.vercel
+
+# Railway
+.railway
