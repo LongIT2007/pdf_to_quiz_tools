@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useRoute } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 export default function CreateQuiz() {
   const [location, setLocation] = useLocation();
-  const [, params] = useRoute("/quiz/create");
+  // Get pdfId from URL query params
   const pdfId = new URLSearchParams(window.location.search).get("pdfId");
 
   const [pdf, setPdf] = useState<any>(null);
