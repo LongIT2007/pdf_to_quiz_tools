@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { FileText, BookOpen, Upload, Home } from "lucide-react";
+import { FileText, BookOpen, Upload, Home, Sparkles } from "lucide-react";
 
 export default function Navigation() {
   const [location, setLocation] = useLocation();
@@ -8,6 +8,7 @@ export default function Navigation() {
   const navItems = [
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/upload", label: "Upload PDF", icon: Upload },
+    { path: "/upload/smart", label: "Smart Upload", icon: Sparkles },
   ];
 
   return (

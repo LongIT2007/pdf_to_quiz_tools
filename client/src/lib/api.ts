@@ -167,4 +167,51 @@ export const healthCheck = async (): Promise<boolean> => {
   }
 };
 
+// PDF Analysis API
+export interface AnalysisResult {
+  hasQuestions: boolean;
+  hasAnswers: boolean;
+  questions: string[];
+  answers: string[];
+  questionAnswerPairs?: Array<{ question: string; answer: string; options?: string[] }>;
+  documentType: "mixed" | "questions-only" | "answers-only" | "unknown";
+  sourcePDFs?: string[];
+}
+
+export const analysisAPI = {
+  analyzePDF: async (pdfId: string): Promise<AnalysisResult> => {
+    const response = await api.post<APIResponse<AnalysisResult>>(`/analysis/analyze/${pdfId}`);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to analyze PDF");
+    }
+    return response.data.data!;
+  },
+
+  analyzeMultiplePDFs: async (pdfIds: string[]): Promise<AnalysisResult> => {
+    const response = await api.post<APIResponse<AnalysisResult>>("/analysis/analyze-multiple", {
+      pdfIds,
+    });
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to analyze PDFs");
+    }
+    return response.data.data!;
+  },
+
+  generateQuizFromAnalysis: async (
+    pdfId: string | undefined,
+    pdfIds: string[] | undefined,
+    options?: any
+  ): Promise<Quiz> => {
+    const response = await api.post<APIResponse<Quiz>>("/analysis/generate-from-analysis", {
+      pdfId,
+      pdfIds,
+      options,
+    });
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to generate quiz");
+    }
+    return response.data.data!;
+  },
+};
+
 export default api;

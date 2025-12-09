@@ -113,6 +113,10 @@ export default function Dashboard() {
             <Upload className="w-4 h-4 mr-2" />
             Upload PDF
           </Button>
+          <Button onClick={() => setLocation("/upload/smart")} size="lg" variant="outline">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Smart Upload (AI)
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
