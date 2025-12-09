@@ -1,0 +1,132 @@
+/* Custom animations and styles for PDF to Quiz Tools */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes softGlow {
+  0%, 100% {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    box-shadow: 0 10px 15px -3px rgba(85, 150, 230, 0.1);
+  }
+}
+
+/* Hero section animation */
+.hero-title {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-description {
+  animation: fadeInUp 0.8s ease-out 0.1s both;
+}
+
+.hero-buttons {
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Card hover effects */
+.tool-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Feature cards */
+.feature-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.feature-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.feature-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Badge animations */
+.feature-badge {
+  transition: all 0.2s ease-out;
+}
+
+.feature-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease-out;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Link hover effects */
+a {
+  transition: color 0.2s ease-out;
+}
+
+/* Table row hover */
+tbody tr {
+  transition: background-color 0.2s ease-out;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(85, 150, 230, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(85, 150, 230, 0.5);
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(85, 150, 230, 0.2);
+  color: inherit;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(85, 150, 230, 0.5);
+  outline-offset: 2px;
+}
