@@ -209,7 +209,7 @@ Rules:
       language?: string;
     }
   ): Promise<Quiz> {
-    const { default: AIService } = await import("./AIService");
+    const { AIService } = await import("./AIService");
     const aiService = new AIService();
 
     // If we have question-answer pairs, create quiz directly
