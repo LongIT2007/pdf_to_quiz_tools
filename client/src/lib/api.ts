@@ -181,7 +181,103 @@ export const quizAPI = {
 
 // Image API
 export const imageAPI = {
+  // Direct upload to Cloudinary (much faster - uploads directly from browser)
+  uploadDirect: async (
+    file: File,
+    config: {
+      cloudName: string;
+      uploadPreset?: string;
+      uploadUrl: string;
+      timestamp?: number;
+      signature?: string;
+      apiKey?: string;
+    }
+  ): Promise<{ url: string; filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "quiz-images");
+    
+    // Use unsigned preset if available (simplest)
+    if (config.uploadPreset) {
+      formData.append("upload_preset", config.uploadPreset);
+    } else if (config.signature && config.timestamp && config.apiKey) {
+      // Use signed upload
+      formData.append("api_key", config.apiKey);
+      formData.append("timestamp", config.timestamp.toString());
+      formData.append("signature", config.signature);
+    }
+    
+    // Add transformations as separate parameters (Cloudinary prefers this format)
+    formData.append("quality", "auto:good");
+    formData.append("fetch_format", "auto");
+
+    const response = await fetch(config.uploadUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: "Upload failed" }));
+      throw new Error(error.message || "Failed to upload image to Cloudinary");
+    }
+
+    const result = await response.json();
+    return {
+      url: result.secure_url,
+      filename: result.secure_url,
+      size: file.size,
+    };
+  },
+
+  // Get upload configuration for direct upload
+  getUploadConfig: async (): Promise<{ 
+    useDirectUpload: boolean; 
+    cloudName?: string; 
+    uploadPreset?: string; 
+    uploadUrl?: string;
+    timestamp?: number;
+    signature?: string;
+    apiKey?: string;
+  }> => {
+    const response = await api.get<APIResponse<{ 
+      useDirectUpload: boolean; 
+      cloudName?: string; 
+      uploadPreset?: string; 
+      uploadUrl?: string;
+      timestamp?: number;
+      signature?: string;
+      apiKey?: string;
+    }>>(
+      "/images/upload/config"
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to get upload config");
+    }
+
+    return response.data.data || { useDirectUpload: false };
+  },
+
   upload: async (file: File): Promise<{ url: string; filename: string; size: number }> => {
+    // Try direct upload first if available (much faster - uploads directly from browser to Cloudinary)
+    try {
+      const uploadConfig = await imageAPI.getUploadConfig();
+      if (uploadConfig.useDirectUpload && uploadConfig.cloudName && uploadConfig.uploadUrl) {
+        return await imageAPI.uploadDirect(file, {
+          cloudName: uploadConfig.cloudName,
+          uploadPreset: uploadConfig.uploadPreset,
+          uploadUrl: uploadConfig.uploadUrl,
+          timestamp: uploadConfig.timestamp,
+          signature: uploadConfig.signature,
+          apiKey: uploadConfig.apiKey,
+        });
+      }
+    } catch (error: any) {
+      console.warn("Direct upload failed, falling back to server upload:", error.message);
+      // Continue to fallback
+    }
+
+    // Fallback to server upload (slower but works if Cloudinary not configured)
     const formData = new FormData();
     formData.append("image", file);
 

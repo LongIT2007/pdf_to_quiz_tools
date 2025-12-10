@@ -44,7 +44,6 @@ export class CloudinaryService {
           resource_type: "image",
           folder: "quiz-images", // Organize images in a folder
           public_id: publicId,
-          format: "auto", // Auto-detect format
           transformation: [
             { quality: "auto:good" }, // Auto optimize quality
             { fetch_format: "auto" }, // Auto format (webp when possible)

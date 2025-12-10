@@ -5,7 +5,9 @@ import { CloudinaryService } from "../services/CloudinaryService";
 import { APIResponse } from "../types";
 import { logger } from "../utils/logger";
 import { config } from "../config/env";
+import { v2 as cloudinary } from "cloudinary";
 import path from "path";
+import { existsSync } from "fs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +36,68 @@ function getBaseUrl(req: Request): string {
   return `${finalProtocol}://${host}`;
 }
 
-// Upload image endpoint
+// Get Cloudinary upload URL (for direct client upload - faster)
+router.get("/upload/config", async (req, res) => {
+  try {
+    if (!CloudinaryService.isConfigured()) {
+      return res.json({
+        success: true,
+        data: {
+          useDirectUpload: false,
+        },
+      } as APIResponse);
+    }
+
+    const cloudName = config.CLOUDINARY_CLOUD_NAME!;
+    const uploadPreset = config.CLOUDINARY_UPLOAD_PRESET;
+    
+    // If unsigned preset is configured, use direct upload
+    if (uploadPreset) {
+      return res.json({
+        success: true,
+        data: {
+          useDirectUpload: true,
+          cloudName: cloudName,
+          uploadPreset: uploadPreset,
+          uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        },
+        message: "Direct upload configured",
+      } as APIResponse);
+    }
+    
+    // Otherwise, generate signed upload parameters
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp: timestamp,
+        folder: "quiz-images",
+      },
+      config.CLOUDINARY_API_SECRET!
+    );
+    
+    res.json({
+      success: true,
+      data: {
+        useDirectUpload: true,
+        cloudName: cloudName,
+        uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        timestamp: timestamp,
+        signature: signature,
+        apiKey: config.CLOUDINARY_API_KEY,
+      },
+      message: "Signed upload URL generated",
+    } as APIResponse);
+  } catch (error: any) {
+    logger.error("Error generating upload config:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to generate upload config",
+    } as APIResponse);
+  }
+});
+
+// Upload image endpoint (fallback if direct upload not available)
 router.post("/upload", uploadImage.single("image"), async (req, res) => {
   try {
     if (!req.file) {
@@ -49,12 +112,12 @@ router.post("/upload", uploadImage.single("image"), async (req, res) => {
 
     // Upload to Cloudinary if configured, otherwise use local storage
     if (CloudinaryService.isConfigured()) {
-      // Upload to Cloudinary
+      // Upload to Cloudinary via server
       const buffer = req.file.buffer || Buffer.from([]);
       imageUrl = await CloudinaryService.uploadImage(buffer, req.file.originalname);
       filename = imageUrl; // Use Cloudinary URL as filename identifier
       
-      logger.info(`Image uploaded to Cloudinary: ${imageUrl}`);
+      logger.info(`Image uploaded to Cloudinary via server: ${imageUrl}`);
     } else {
       // Use local storage
       const baseUrl = getBaseUrl(req);
@@ -83,7 +146,7 @@ router.post("/upload", uploadImage.single("image"), async (req, res) => {
 });
 
 // Serve uploaded images (only for local storage, Cloudinary images are served directly)
-router.get("/:filename", (req, res) => {
+router.get("/:filename", async (req, res) => {
   try {
     const filename = decodeURIComponent(req.params.filename);
     
@@ -92,8 +155,25 @@ router.get("/:filename", (req, res) => {
       return res.redirect(filename);
     }
     
+    // If Cloudinary is configured, we shouldn't serve local files (they're in memory only)
+    if (CloudinaryService.isConfigured()) {
+      return res.status(404).json({
+        success: false,
+        error: "Image not found. Using Cloudinary storage.",
+      } as APIResponse);
+    }
+    
     // Otherwise, serve from local storage
     const filePath = path.join(imageUploadDir, filename);
+    
+    // Check if file exists
+    if (!existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        error: "Image not found",
+      } as APIResponse);
+    }
+    
     res.sendFile(filePath);
   } catch (error: any) {
     logger.error("Error serving image:", error);
