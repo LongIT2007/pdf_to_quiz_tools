@@ -169,6 +169,14 @@ export const quizAPI = {
     }
     return response.data.data!;
   },
+
+  update: async (id: string, quizData: Partial<Omit<Quiz, "id" | "createdAt" | "updatedAt">>): Promise<Quiz> => {
+    const response = await api.put<APIResponse<Quiz>>(`/quizzes/${id}`, quizData);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to update quiz");
+    }
+    return response.data.data!;
+  },
 };
 
 // Image API

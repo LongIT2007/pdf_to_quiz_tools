@@ -19,6 +19,11 @@ function ViewQuizWrapper() {
   return <ViewQuiz params={params} />;
 }
 
+function EditorQuizWrapper() {
+  const [, params] = useRoute("/quiz/editor/:id");
+  return <EditorQuiz params={params} />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -27,6 +32,7 @@ function Router() {
       <Route path={"/upload/smart"} component={SmartUpload} />
       <Route path={"/quiz/create"} component={CreateQuiz} />
       <Route path={"/quiz/smart-create"} component={SmartCreateQuiz} />
+      <Route path={"/quiz/editor/:id"} component={EditorQuizWrapper} />
       <Route path={"/quiz/editor"} component={EditorQuiz} />
       <Route path={"/quiz/:id"} component={ViewQuizWrapper} />
       <Route path={"/pdfs"} component={Dashboard} />

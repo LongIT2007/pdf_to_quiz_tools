@@ -15,6 +15,7 @@ import {
   XCircle,
   Trash2,
   Sparkles,
+  Edit,
 } from "lucide-react";
 import { pdfAPI, quizAPI, PDFDocument, Quiz } from "@/lib/api";
 import { toast } from "sonner";
@@ -247,6 +248,13 @@ export default function Dashboard() {
                           className="flex-1"
                         >
                           Làm Quiz
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
+                        >
+                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"

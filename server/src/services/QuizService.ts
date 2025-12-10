@@ -78,4 +78,16 @@ export class QuizService {
     logger.success(`Manual quiz created: ${savedQuiz.id}`);
     return savedQuiz;
   }
+
+  async updateQuiz(quizId: string, quizData: Partial<Omit<Quiz, "id" | "createdAt" | "updatedAt">>): Promise<Quiz> {
+    // Verify quiz exists
+    const existingQuiz = await QuizModel.findById(quizId);
+    if (!existingQuiz) {
+      throw new NotFoundError("Quiz");
+    }
+
+    const updatedQuiz = await QuizModel.update(quizId, quizData);
+    logger.success(`Quiz updated: ${quizId}`);
+    return updatedQuiz;
+  }
 }

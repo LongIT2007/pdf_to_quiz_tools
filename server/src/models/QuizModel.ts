@@ -455,4 +455,127 @@ export class QuizModel {
     const result = db.prepare("SELECT COUNT(*) as count FROM quizzes").get() as any;
     return result.count;
   }
+
+  static async update(id: string, quizData: Partial<Omit<Quiz, "id" | "createdAt" | "updatedAt">>): Promise<Quiz> {
+    const dbType = getDbType();
+    const now = new Date();
+    const metadata = quizData.metadata ? JSON.stringify(quizData.metadata) : null;
+
+    if (dbType === "postgres") {
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      
+      // Update quiz
+      await pool.query(`
+        UPDATE quizzes 
+        SET title = $1, description = $2, updated_at = $3, metadata = $4
+        WHERE id = $5
+      `, [
+        quizData.title,
+        quizData.description || null,
+        now.toISOString(),
+        metadata,
+        id
+      ]);
+
+      // Delete existing questions
+      await pool.query("DELETE FROM quiz_questions WHERE quiz_id = $1", [id]);
+
+      // Insert updated questions
+      if (quizData.questions) {
+        for (let index = 0; index < quizData.questions.length; index++) {
+          const question = quizData.questions[index];
+          const questionId = generateQuestionId();
+          
+          let optionsJson: any = null;
+          if (question.options) {
+            optionsJson = question.options;
+          }
+          if (question.matchingPairs) {
+            optionsJson = { ...(optionsJson || {}), matchingPairs: question.matchingPairs };
+          }
+          if (question.gaps) {
+            optionsJson = { ...(optionsJson || {}), gaps: question.gaps };
+          }
+          const options = optionsJson ? JSON.stringify(optionsJson) : null;
+          
+          await pool.query(`
+            INSERT INTO quiz_questions (
+              id, quiz_id, question, type, options, correct_answer,
+              explanation, points, question_order, image_url
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          `, [
+            questionId,
+            id,
+            question.question,
+            question.type,
+            options,
+            typeof question.correctAnswer === 'object' ? JSON.stringify(question.correctAnswer) : String(question.correctAnswer),
+            question.explanation || null,
+            question.points || 1,
+            index,
+            question.imageUrl || null
+          ]);
+        }
+      }
+    } else {
+      const db = getDatabase();
+      
+      // Update quiz
+      db.prepare(`
+        UPDATE quizzes 
+        SET title = ?, description = ?, updated_at = ?, metadata = ?
+        WHERE id = ?
+      `).run(
+        quizData.title,
+        quizData.description || null,
+        now.toISOString(),
+        metadata,
+        id
+      );
+
+      // Delete existing questions
+      db.prepare("DELETE FROM quiz_questions WHERE quiz_id = ?").run(id);
+
+      // Insert updated questions
+      if (quizData.questions) {
+        quizData.questions.forEach((question, index) => {
+          const questionId = generateQuestionId();
+          
+          let optionsJson: any = null;
+          if (question.options) {
+            optionsJson = question.options;
+          }
+          if (question.matchingPairs) {
+            optionsJson = { ...(optionsJson || {}), matchingPairs: question.matchingPairs };
+          }
+          if (question.gaps) {
+            optionsJson = { ...(optionsJson || {}), gaps: question.gaps };
+          }
+          const options = optionsJson ? JSON.stringify(optionsJson) : null;
+          
+          db.prepare(`
+            INSERT INTO quiz_questions (
+              id, quiz_id, question, type, options, correct_answer,
+              explanation, points, question_order, image_url
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            questionId,
+            id,
+            question.question,
+            question.type,
+            options,
+            typeof question.correctAnswer === 'object' ? JSON.stringify(question.correctAnswer) : String(question.correctAnswer),
+            question.explanation || null,
+            question.points || 1,
+            index,
+            question.imageUrl || null
+          );
+        });
+      }
+    }
+
+    // Return updated quiz
+    return await this.findById(id) as Quiz;
+  }
 }

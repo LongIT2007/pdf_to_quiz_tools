@@ -141,4 +141,32 @@ export class QuizController {
       });
     }
   };
+
+  updateQuiz = async (req: Request, res: Response<APIResponse>) => {
+    try {
+      const { id } = req.params;
+      const quizData = req.body;
+      
+      if (!quizData.title && !quizData.questions) {
+        return res.status(400).json({
+          success: false,
+          error: "At least title or questions must be provided",
+        });
+      }
+
+      const quiz = await this.quizService.updateQuiz(id, quizData);
+
+      res.json({
+        success: true,
+        data: quiz,
+        message: "Quiz updated successfully",
+      });
+    } catch (error: any) {
+      logger.error("Error updating quiz:", error);
+      res.status(error.statusCode || 500).json({
+        success: false,
+        error: error.message || "Failed to update quiz",
+      });
+    }
+  };
 }

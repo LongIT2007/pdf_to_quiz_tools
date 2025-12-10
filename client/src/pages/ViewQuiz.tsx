@@ -17,6 +17,7 @@ import {
   HelpCircle,
   BookOpen,
   Download,
+  Edit,
 } from "lucide-react";
 import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
@@ -185,14 +186,22 @@ export default function ViewQuiz(props: ViewQuizProps) {
   return (
     <div className="min-h-screen bg-background py-12 px-4">
       <div className="container max-w-4xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => setLocation("/quizzes")}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Quay lại
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => setLocation("/quizzes")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại
+          </Button>
+          <Button
+            onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
+            variant="outline"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Chỉnh sửa
+          </Button>
+        </div>
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
