@@ -113,26 +113,13 @@ export class PDFAnalysisController {
       // Save quiz to database
       const { QuizModel } = await import("../models/QuizModel");
       
-      // Check database type and use appropriate method
-      const { getDbType } = await import("../config/database");
-      const dbType = getDbType();
-      
-      let savedQuiz: Quiz;
-      
-      if (dbType === "postgres") {
-        // For PostgreSQL, we need async model methods
-        // For now, use the sync version (will need to update models)
-        savedQuiz = QuizModel.create({
-          ...quiz,
-          pdfId: pdfId || pdfIds?.[0],
-        });
-      } else {
-        // SQLite - use sync create
-        savedQuiz = QuizModel.create({
-          ...quiz,
-          pdfId: pdfId || pdfIds?.[0],
-        });
-      }
+      // QuizModel.create() is async, so we need to await it
+      const savedQuiz = await QuizModel.create({
+        ...quiz,
+        pdfId: pdfId || pdfIds?.[0],
+      });
+
+      logger.success(`Quiz generated from analysis: ${savedQuiz.id}`);
 
       res.status(201).json({
         success: true,
