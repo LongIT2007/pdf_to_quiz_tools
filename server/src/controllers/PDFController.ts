@@ -20,6 +20,7 @@ export class PDFController {
         });
       }
 
+      logger.info(`Uploading PDF: ${req.file.originalname}, size: ${req.file.size} bytes`);
       const pdf = await this.pdfService.savePDF(req.file);
 
       res.status(201).json({
@@ -29,9 +30,19 @@ export class PDFController {
       });
     } catch (error: any) {
       logger.error("Error uploading PDF:", error);
+      logger.error("Error stack:", error.stack);
+      logger.error("Error details:", {
+        message: error.message,
+        name: error.name,
+        code: error.code,
+      });
       res.status(error.statusCode || 500).json({
         success: false,
         error: error.message || "Failed to upload PDF",
+        ...(process.env.NODE_ENV === "development" && { 
+          details: error.stack,
+          code: error.code 
+        }),
       });
     }
   };
