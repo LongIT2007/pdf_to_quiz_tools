@@ -224,7 +224,7 @@ export const imageAPI = {
   ensureAbsoluteUrl: (url: string): string => {
     if (!url) return url;
     
-    // If already absolute, return as is
+    // If already absolute (including Cloudinary URLs), return as is
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }

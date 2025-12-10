@@ -9,6 +9,11 @@ const envSchema = z.object({
   BASE_URL: z.string().optional(),
   APP_URL: z.string().optional(), // Alternative name
   
+  // Cloudinary Configuration
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  
   // File upload
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_FILE_SIZE: z.string().default("104857600"), // 100MB

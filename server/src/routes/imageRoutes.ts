@@ -1,6 +1,7 @@
 // Image Routes
 import { Router, Request } from "express";
 import { uploadImage, imageUploadDir } from "../middleware/uploadImage";
+import { CloudinaryService } from "../services/CloudinaryService";
 import { APIResponse } from "../types";
 import { logger } from "../utils/logger";
 import { config } from "../config/env";
@@ -34,7 +35,7 @@ function getBaseUrl(req: Request): string {
 }
 
 // Upload image endpoint
-router.post("/upload", uploadImage.single("image"), (req, res) => {
+router.post("/upload", uploadImage.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -43,17 +44,31 @@ router.post("/upload", uploadImage.single("image"), (req, res) => {
       } as APIResponse);
     }
 
-    // Return full URL with hostname for production, relative URL for development
-    const baseUrl = getBaseUrl(req);
-    const imageUrl = `${baseUrl}/api/images/${req.file.filename}`;
-    
-    logger.info(`Image uploaded: ${imageUrl}`);
+    let imageUrl: string;
+    let filename: string;
+
+    // Upload to Cloudinary if configured, otherwise use local storage
+    if (CloudinaryService.isConfigured()) {
+      // Upload to Cloudinary
+      const buffer = req.file.buffer || Buffer.from([]);
+      imageUrl = await CloudinaryService.uploadImage(buffer, req.file.originalname);
+      filename = imageUrl; // Use Cloudinary URL as filename identifier
+      
+      logger.info(`Image uploaded to Cloudinary: ${imageUrl}`);
+    } else {
+      // Use local storage
+      const baseUrl = getBaseUrl(req);
+      imageUrl = `${baseUrl}/api/images/${req.file.filename}`;
+      filename = req.file.filename;
+      
+      logger.info(`Image uploaded locally: ${imageUrl}`);
+    }
     
     res.json({
       success: true,
       data: {
         url: imageUrl,
-        filename: req.file.filename,
+        filename: filename,
         size: req.file.size,
       },
       message: "Image uploaded successfully",
@@ -67,10 +82,17 @@ router.post("/upload", uploadImage.single("image"), (req, res) => {
   }
 });
 
-// Serve uploaded images
+// Serve uploaded images (only for local storage, Cloudinary images are served directly)
 router.get("/:filename", (req, res) => {
   try {
-    const filename = req.params.filename;
+    const filename = decodeURIComponent(req.params.filename);
+    
+    // If filename is a Cloudinary URL (starts with http:// or https://), redirect to it
+    if (filename.startsWith('http://') || filename.startsWith('https://')) {
+      return res.redirect(filename);
+    }
+    
+    // Otherwise, serve from local storage
     const filePath = path.join(imageUploadDir, filename);
     res.sendFile(filePath);
   } catch (error: any) {
