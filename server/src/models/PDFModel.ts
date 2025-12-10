@@ -10,42 +10,53 @@ export class PDFModel {
     const dbType = getDbType();
 
     if (dbType === "postgres") {
-      const { getPostgresPool } = await import("../config/database-pg");
-      const pool = getPostgresPool();
-      const result = await pool.query(`
-        INSERT INTO pdf_documents (
-          id, filename, original_name, file_path, file_size, mime_type,
-          upload_date, status, extracted_text, page_count, error_message
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING *
-      `, [
-        id,
-        pdfData.filename,
-        pdfData.originalName,
-        pdfData.filePath,
-        pdfData.fileSize,
-        pdfData.mimeType,
-        uploadDate.toISOString(),
-        pdfData.status || "processing",
-        pdfData.extractedText || null,
-        pdfData.pageCount || null,
-        pdfData.errorMessage || null,
-      ]);
+      try {
+        const { getPostgresPool } = await import("../config/database-pg");
+        const pool = getPostgresPool();
+        const result = await pool.query(`
+          INSERT INTO pdf_documents (
+            id, filename, original_name, file_path, file_size, mime_type,
+            upload_date, status, extracted_text, page_count, error_message
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          RETURNING *
+        `, [
+          id,
+          pdfData.filename,
+          pdfData.originalName,
+          pdfData.filePath,
+          pdfData.fileSize,
+          pdfData.mimeType,
+          uploadDate.toISOString(),
+          pdfData.status || "processing",
+          pdfData.extractedText || null,
+          pdfData.pageCount || null,
+          pdfData.errorMessage || null,
+        ]);
 
-      const row = result.rows[0];
-      return {
-        id: row.id,
-        filename: row.filename,
-        originalName: row.original_name,
-        filePath: row.file_path,
-        fileSize: row.file_size,
-        mimeType: row.mime_type,
-        uploadDate: new Date(row.upload_date),
-        status: row.status,
-        extractedText: row.extracted_text,
-        pageCount: row.page_count,
-        errorMessage: row.error_message,
-      };
+        const row = result.rows[0];
+        return {
+          id: row.id,
+          filename: row.filename,
+          originalName: row.original_name,
+          filePath: row.file_path,
+          fileSize: row.file_size,
+          mimeType: row.mime_type,
+          uploadDate: new Date(row.upload_date),
+          status: row.status,
+          extractedText: row.extracted_text,
+          pageCount: row.page_count,
+          errorMessage: row.error_message,
+        };
+      } catch (error: any) {
+        const { logger } = await import("../utils/logger");
+        logger.error("Database error in PDFModel.create:", error);
+        logger.error("Database error details:", {
+          message: error.message,
+          code: error.code,
+          stack: error.stack,
+        });
+        throw new Error(`Database error: ${error.message}`);
+      }
     }
 
     // SQLite path

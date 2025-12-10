@@ -8,7 +8,9 @@ export function getPostgresPool(): Pool {
     let connectionString = process.env.DATABASE_URL;
     
     if (!connectionString) {
-      throw new Error('DATABASE_URL is required for PostgreSQL');
+      const error = new Error('DATABASE_URL is required for PostgreSQL');
+      console.error('❌ Database configuration error:', error.message);
+      throw error;
     }
     
     // Log connection info (mask password for security)
@@ -34,19 +36,38 @@ export function getPostgresPool(): Pool {
       console.warn('⚠️  DATABASE_URL format incorrect, constructed from parts. Please use full connection string!');
     }
 
-    pool = new Pool({
-      connectionString,
-      ssl: process.env.NODE_ENV === 'production' 
-        ? { rejectUnauthorized: false } 
-        : false,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000, // Increased timeout
-    });
+    try {
+      pool = new Pool({
+        connectionString,
+        ssl: process.env.NODE_ENV === 'production' 
+          ? { rejectUnauthorized: false } 
+          : false,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000, // Increased timeout
+      });
 
-    pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
-    });
+      pool.on('error', (err) => {
+        console.error('❌ Unexpected error on idle PostgreSQL client:', err);
+        console.error('Error details:', {
+          message: err.message,
+          code: err.code,
+          stack: err.stack,
+        });
+      });
+
+      // Test connection
+      pool.query('SELECT NOW()').catch((err) => {
+        console.error('❌ Failed to connect to PostgreSQL:', err);
+        console.error('Connection error details:', {
+          message: err.message,
+          code: err.code,
+        });
+      });
+    } catch (error: any) {
+      console.error('❌ Failed to create PostgreSQL pool:', error);
+      throw error;
+    }
   }
 
   return pool;
