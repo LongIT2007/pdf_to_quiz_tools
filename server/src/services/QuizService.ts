@@ -23,7 +23,7 @@ export class QuizService {
     const quiz = await this.aiService.generateQuiz(pdfText, request.options);
 
     // Save quiz to database
-    const savedQuiz = QuizModel.create({
+    const savedQuiz = await QuizModel.create({
       ...quiz,
       pdfId: request.pdfId,
     });
@@ -34,7 +34,7 @@ export class QuizService {
   }
 
   async getQuiz(quizId: string): Promise<Quiz> {
-    const quiz = QuizModel.findById(quizId);
+    const quiz = await QuizModel.findById(quizId);
     if (!quiz) {
       throw new NotFoundError("Quiz");
     }
@@ -43,8 +43,8 @@ export class QuizService {
 
   async listQuizzes(page = 1, limit = 20) {
     const offset = (page - 1) * limit;
-    const quizzes = QuizModel.findAll(limit, offset);
-    const total = QuizModel.count();
+    const quizzes = await QuizModel.findAll(limit, offset);
+    const total = await QuizModel.count();
 
     return {
       data: quizzes,
@@ -61,15 +61,15 @@ export class QuizService {
     // Verify PDF exists
     await this.pdfService.getPDF(pdfId);
     
-    return QuizModel.findByPDFId(pdfId);
+    return await QuizModel.findByPDFId(pdfId);
   }
 
   async deleteQuiz(quizId: string): Promise<void> {
-    const quiz = QuizModel.findById(quizId);
+    const quiz = await QuizModel.findById(quizId);
     if (!quiz) {
       throw new NotFoundError("Quiz");
     }
-    QuizModel.delete(quizId);
+    await QuizModel.delete(quizId);
     logger.info(`Quiz deleted: ${quizId}`);
   }
 }

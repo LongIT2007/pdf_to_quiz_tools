@@ -3,21 +3,6 @@ import { getDbType } from "../config/database";
 import { PDFDocument } from "../types";
 import { generatePDFId } from "../utils/id";
 
-// Get database instance
-function getDb() {
-  const dbType = getDbType();
-  
-  if (dbType === "postgres") {
-    // Import PostgreSQL pool
-    const { getPostgresPool } = require("../config/database-pg");
-    return getPostgresPool();
-  }
-  
-  // Import SQLite database
-  const { getDatabase } = require("../config/database");
-  return getDatabase();
-}
-
 export class PDFModel {
   static async create(pdfData: Omit<PDFDocument, "id" | "uploadDate">): Promise<PDFDocument> {
     const id = generatePDFId();
@@ -25,7 +10,8 @@ export class PDFModel {
     const dbType = getDbType();
 
     if (dbType === "postgres") {
-      const pool = getDb();
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
       const result = await pool.query(`
         INSERT INTO pdf_documents (
           id, filename, original_name, file_path, file_size, mime_type,
@@ -63,7 +49,8 @@ export class PDFModel {
     }
 
     // SQLite path
-    const db = getDb();
+    const { getDatabase } = await import("../config/database");
+    const db = getDatabase();
     db.prepare(`
       INSERT INTO pdf_documents (
         id, filename, original_name, file_path, file_size, mime_type,
@@ -116,7 +103,8 @@ export class PDFModel {
       };
     }
     
-    const db = getDb();
+    const { getDatabase } = await import("../config/database");
+    const db = getDatabase();
     const row = db.prepare("SELECT * FROM pdf_documents WHERE id = ?").get(id) as any;
     
     if (!row) return null;
@@ -162,7 +150,8 @@ export class PDFModel {
       }));
     }
     
-    const db = getDb();
+    const { getDatabase } = await import("../config/database");
+    const db = getDatabase();
     const rows = db
       .prepare("SELECT * FROM pdf_documents ORDER BY upload_date DESC LIMIT ? OFFSET ?")
       .all(limit, offset) as any[];
@@ -229,7 +218,8 @@ export class PDFModel {
       const query = `UPDATE pdf_documents SET ${updatesList.join(", ")} WHERE id = $${values.length}`;
       await pool.query(query, values);
     } else {
-      const db = getDb();
+      const { getDatabase } = await import("../config/database");
+      const db = getDatabase();
       values.push(id);
       db.prepare(`UPDATE pdf_documents SET ${updatesList.join(", ")} WHERE id = ?`).run(...values);
     }
@@ -247,7 +237,8 @@ export class PDFModel {
       return (result.rowCount ?? 0) > 0;
     }
     
-    const db = getDb();
+    const { getDatabase } = await import("../config/database");
+    const db = getDatabase();
     const result = db.prepare("DELETE FROM pdf_documents WHERE id = ?").run(id);
     return result.changes > 0;
   }
@@ -262,7 +253,8 @@ export class PDFModel {
       return parseInt(result.rows[0].count);
     }
     
-    const db = getDb();
+    const { getDatabase } = await import("../config/database");
+    const db = getDatabase();
     const result = db.prepare("SELECT COUNT(*) as count FROM pdf_documents").get() as any;
     return result.count;
   }

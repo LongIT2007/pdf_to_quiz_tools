@@ -31,7 +31,7 @@ export class PDFService {
 
       writeFileSync(filePath, file.buffer);
 
-      const pdfDoc = PDFModel.create({
+      const pdfDoc = await PDFModel.create({
         filename,
         originalName: file.originalname,
         filePath,
@@ -43,9 +43,9 @@ export class PDFService {
       logger.success(`PDF saved: ${pdfDoc.id} - ${file.originalname}`);
 
       // Process PDF asynchronously
-      this.processPDF(pdfDoc.id).catch((error) => {
+      this.processPDF(pdfDoc.id).catch(async (error) => {
         logger.error(`Failed to process PDF ${pdfDoc.id}:`, error);
-        PDFModel.update(pdfDoc.id, {
+        await PDFModel.update(pdfDoc.id, {
           status: "failed",
           errorMessage: error.message,
         });
