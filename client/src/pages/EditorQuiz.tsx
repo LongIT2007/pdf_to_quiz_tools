@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Trash2, Image as ImageIcon, Save, X } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, Image as ImageIcon, Save, X, FileQuestion } from "lucide-react";
 import { quizAPI, imageAPI, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { QuestionEditor } from "@/components/QuestionEditor";
@@ -55,7 +55,23 @@ export default function EditorQuiz() {
       newQuestion.correctAnswer = "";
     }
 
-    setQuestions([...questions, newQuestion]);
+    const updatedQuestions = [...questions, newQuestion];
+    setQuestions(updatedQuestions);
+
+    // Scroll to the new question after a short delay
+    setTimeout(() => {
+      const newQuestionElement = document.getElementById(`question-${newQuestion.id}`);
+      if (newQuestionElement) {
+        newQuestionElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Focus on the question input after scroll
+        setTimeout(() => {
+          const questionInput = newQuestionElement.querySelector('[contenteditable="true"]') as HTMLElement;
+          if (questionInput) {
+            questionInput.focus();
+          }
+        }, 300);
+      }
+    }, 100);
   };
 
   const removeQuestion = (id: string) => {
@@ -359,7 +375,7 @@ export default function EditorQuiz() {
 
         <div className="space-y-6">
           {questions.map((question, index) => (
-            <Card key={question.id}>
+            <Card key={question.id} id={`question-${question.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -710,12 +726,77 @@ export default function EditorQuiz() {
           {questions.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Chưa có câu hỏi nào. Hãy thêm câu hỏi để bắt đầu!
                 </p>
               </CardContent>
             </Card>
           )}
+
+          {/* Add Question Section at the bottom */}
+          <Card className="border-dashed border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileQuestion className="w-5 h-5" />
+                Thêm câu hỏi mới
+              </CardTitle>
+              <CardDescription>
+                Chọn loại câu hỏi bạn muốn thêm vào quiz
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("multiple-choice")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Trắc nghiệm</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("fill-blank")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Điền từ</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("gap-filling")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Điền (nhiều chỗ)</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("matching")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Nối cặp</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("true-false")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Đúng/Sai</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => addQuestion("short-answer")}
+                  className="h-auto py-3 flex flex-col gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-xs">Tự luận</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {questions.length > 0 && (
