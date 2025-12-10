@@ -71,6 +71,64 @@ export default function Dashboard() {
     }
   };
 
+  // Parse quiz title to extract group, type, and test number
+  const parseQuizTitle = (title: string) => {
+    // Pattern: "Test {number} {type} ({group})"
+    // Examples:
+    // - "Test 1 Reading (B1 Preliminary 1)"
+    // - "Test 1 Listening (b1_preliminary_2_for_the_revised_2020_exam)"
+    
+    const testMatch = title.match(/Test\s+(\d+)/i);
+    const testNumber = testMatch ? parseInt(testMatch[1], 10) : 0;
+    
+    // Extract type (Reading, Listening, etc.)
+    let type = "";
+    if (title.match(/\bReading\b/i)) type = "Reading";
+    else if (title.match(/\bListening\b/i)) type = "Listening";
+    else if (title.match(/\bWriting\b/i)) type = "Writing";
+    else if (title.match(/\bSpeaking\b/i)) type = "Speaking";
+    else type = "Other";
+    
+    // Extract group (content in parentheses)
+    const groupMatch = title.match(/\(([^)]+)\)/);
+    const group = groupMatch ? groupMatch[1] : "";
+    
+    return { testNumber, type, group, originalTitle: title };
+  };
+
+  // Sort quizzes: group -> type (Reading first) -> test number
+  const sortedQuizzes = [...quizzes].sort((a, b) => {
+    const parsedA = parseQuizTitle(a.title);
+    const parsedB = parseQuizTitle(b.title);
+    
+    // 1. Sort by group (alphabetically)
+    if (parsedA.group !== parsedB.group) {
+      return parsedA.group.localeCompare(parsedB.group);
+    }
+    
+    // 2. Within same group, sort by type (Reading, Listening, Writing, Speaking, Other)
+    const typeOrder: Record<string, number> = {
+      "Reading": 1,
+      "Listening": 2,
+      "Writing": 3,
+      "Speaking": 4,
+      "Other": 5,
+    };
+    const typeA = typeOrder[parsedA.type] || 99;
+    const typeB = typeOrder[parsedB.type] || 99;
+    if (typeA !== typeB) {
+      return typeA - typeB;
+    }
+    
+    // 3. Within same group and type, sort by test number
+    if (parsedA.testNumber !== parsedB.testNumber) {
+      return parsedA.testNumber - parsedB.testNumber;
+    }
+    
+    // 4. Fallback to original title
+    return parsedA.originalTitle.localeCompare(parsedB.originalTitle);
+  });
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -220,53 +278,79 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {quizzes.map((quiz) => (
-                  <Card key={quiz.id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg mb-2">{quiz.title}</CardTitle>
-                      <CardDescription>
-                        {quiz.description || "Không có mô tả"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <Badge variant="outline">
-                          {quiz.questions.length} câu hỏi
-                        </Badge>
-                        {quiz.metadata?.difficulty && (
-                          <Badge>
-                            {quiz.metadata.difficulty === "easy" ? "Dễ" :
-                             quiz.metadata.difficulty === "medium" ? "Trung bình" : "Khó"}
-                          </Badge>
-                        )}
+              <div className="space-y-6">
+                {(() => {
+                  // Group quizzes by group name
+                  const grouped: Record<string, Quiz[]> = {};
+                  sortedQuizzes.forEach((quiz) => {
+                    const parsed = parseQuizTitle(quiz.title);
+                    const groupKey = parsed.group || "Khác";
+                    if (!grouped[groupKey]) {
+                      grouped[groupKey] = [];
+                    }
+                    grouped[groupKey].push(quiz);
+                  });
+
+                  return Object.entries(grouped).map(([groupName, groupQuizzes]) => (
+                    <div key={groupName} className="space-y-4">
+                      {groupName !== "Khác" && (
+                        <div className="border-b pb-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {groupName}
+                          </h3>
+                        </div>
+                      )}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {groupQuizzes.map((quiz) => (
+                          <Card key={quiz.id}>
+                            <CardHeader>
+                              <CardTitle className="text-lg mb-2">{quiz.title}</CardTitle>
+                              <CardDescription>
+                                {quiz.description || "Không có mô tả"}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between mb-4">
+                                <Badge variant="outline">
+                                  {quiz.questions.length} câu hỏi
+                                </Badge>
+                                {quiz.metadata?.difficulty && (
+                                  <Badge>
+                                    {quiz.metadata.difficulty === "easy" ? "Dễ" :
+                                     quiz.metadata.difficulty === "medium" ? "Trung bình" : "Khó"}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => setLocation(`/quiz/${quiz.id}`)}
+                                  className="flex-1"
+                                >
+                                  Làm Quiz
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeleteQuiz(quiz.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => setLocation(`/quiz/${quiz.id}`)}
-                          className="flex-1"
-                        >
-                          Làm Quiz
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteQuiz(quiz.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </TabsContent>
