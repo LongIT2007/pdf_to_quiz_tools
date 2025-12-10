@@ -91,6 +91,15 @@ export class PDFModel {
   }
 
   static findById(id: string): PDFDocument | null {
+    const db = getDb();
+    const dbType = getDbType();
+    
+    if (dbType === "postgres") {
+      // PostgreSQL requires async, but this method is called synchronously
+      // For now, throw error to indicate async is needed
+      throw new Error("findById with PostgreSQL requires async. Use async version.");
+    }
+    
     const row = db.prepare("SELECT * FROM pdf_documents WHERE id = ?").get(id) as any;
     
     if (!row) return null;
@@ -111,6 +120,15 @@ export class PDFModel {
   }
 
   static findAll(limit = 50, offset = 0): PDFDocument[] {
+    const db = getDb();
+    const dbType = getDbType();
+    
+    if (dbType === "postgres") {
+      // PostgreSQL requires async, but this method is called synchronously
+      // For now, throw error to indicate async is needed
+      throw new Error("findAll with PostgreSQL requires async. Use async version.");
+    }
+    
     const rows = db
       .prepare("SELECT * FROM pdf_documents ORDER BY upload_date DESC LIMIT ? OFFSET ?")
       .all(limit, offset) as any[];
@@ -131,8 +149,16 @@ export class PDFModel {
   }
 
   static update(id: string, updates: Partial<PDFDocument>): PDFDocument | null {
+    const db = getDb();
+    const dbType = getDbType();
     const updatesList: string[] = [];
     const values: any[] = [];
+
+    if (dbType === "postgres") {
+      // PostgreSQL requires async, but this method is called synchronously
+      // For now, throw error to indicate async is needed
+      throw new Error("update with PostgreSQL requires async. Use async version.");
+    }
 
     if (updates.status !== undefined) {
       updatesList.push("status = ?");
@@ -160,11 +186,29 @@ export class PDFModel {
   }
 
   static delete(id: string): boolean {
+    const db = getDb();
+    const dbType = getDbType();
+    
+    if (dbType === "postgres") {
+      // PostgreSQL requires async, but this method is called synchronously
+      // For now, throw error to indicate async is needed
+      throw new Error("delete with PostgreSQL requires async. Use async version.");
+    }
+    
     const result = db.prepare("DELETE FROM pdf_documents WHERE id = ?").run(id);
     return result.changes > 0;
   }
 
   static count(): number {
+    const db = getDb();
+    const dbType = getDbType();
+    
+    if (dbType === "postgres") {
+      // PostgreSQL requires async, but this method is called synchronously
+      // For now, throw error to indicate async is needed
+      throw new Error("count with PostgreSQL requires async. Use async version.");
+    }
+    
     const result = db.prepare("SELECT COUNT(*) as count FROM pdf_documents").get() as any;
     return result.count;
   }

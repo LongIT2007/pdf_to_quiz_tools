@@ -7,7 +7,7 @@ const envSchema = z.object({
   
   // File upload
   UPLOAD_DIR: z.string().default("./uploads"),
-  MAX_FILE_SIZE: z.string().default("10485760"), // 10MB
+  MAX_FILE_SIZE: z.string().default("104857600"), // 100MB
   ALLOWED_MIME_TYPES: z.string().default("application/pdf"),
   
   // AI Configuration
