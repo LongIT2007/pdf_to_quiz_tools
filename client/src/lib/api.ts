@@ -1,10 +1,13 @@
 // API Client
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+// Normalize API_BASE_URL - remove trailing /api if present for axios baseURL
+const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/api\/?$/, ''); // Remove trailing /api
+const AXIOS_BASE_URL = `${API_BASE_URL}/api`; // Always add /api for axios
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: AXIOS_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -192,8 +195,40 @@ export const imageAPI = {
   },
 
   getUrl: (filename: string): string => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-    return `${API_BASE_URL}/api/images/${filename}`;
+    // Use normalized API_BASE_URL (without /api)
+    const baseUrl = API_BASE_URL || window.location.origin;
+    
+    // If filename is already a full URL, return it
+    if (filename.startsWith("http://") || filename.startsWith("https://")) {
+      return filename;
+    }
+    
+    // If filename starts with /, it's already a path
+    if (filename.startsWith("/")) {
+      return `${baseUrl}${filename}`;
+    }
+    
+    // Otherwise, construct full URL with /api/images/
+    return `${baseUrl}/api/images/${filename}`;
+  },
+  
+  // Helper to ensure URL is absolute (useful for images in HTML content)
+  ensureAbsoluteUrl: (url: string): string => {
+    if (!url) return url;
+    
+    // If already absolute, return as is
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    
+    // If starts with /, make it absolute using base URL
+    if (url.startsWith("/")) {
+      const baseUrl = API_BASE_URL || window.location.origin;
+      return `${baseUrl}${url}`;
+    }
+    
+    // Otherwise return as is (might be a data URL or something else)
+    return url;
   },
 };
 

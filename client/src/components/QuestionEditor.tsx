@@ -4,6 +4,17 @@ import { imageAPI } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Helper to ensure image URLs in HTML are absolute
+function ensureAbsoluteImageUrls(html: string): string {
+  if (!html) return html;
+  
+  // Replace relative image URLs with absolute ones
+  return html.replace(/src="(\/api\/images\/[^"]+)"/g, (match, path) => {
+    const absoluteUrl = imageAPI.ensureAbsoluteUrl(path);
+    return `src="${absoluteUrl}"`;
+  });
+}
+
 interface QuestionEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -23,8 +34,11 @@ export function QuestionEditor({
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value;
+    if (editorRef.current) {
+      const processedValue = ensureAbsoluteImageUrls(value);
+      if (editorRef.current.innerHTML !== processedValue) {
+        editorRef.current.innerHTML = processedValue;
+      }
     }
   }, [value]);
 
@@ -104,9 +118,10 @@ export function QuestionEditor({
           selection?.addRange(range);
         }
 
-        // Update value
+        // Update value (ensure image URLs are absolute)
         if (editorRef.current) {
-          onChange(editorRef.current.innerHTML);
+          const htmlContent = ensureAbsoluteImageUrls(editorRef.current.innerHTML);
+          onChange(htmlContent);
         }
 
         // Call onImageUpload callback if provided

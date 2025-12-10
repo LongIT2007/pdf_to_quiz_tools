@@ -5,6 +5,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.string().default("3000"),
   
+  // Base URL for API (used in production for full image URLs)
+  BASE_URL: z.string().optional(),
+  APP_URL: z.string().optional(), // Alternative name
+  
   // File upload
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_FILE_SIZE: z.string().default("104857600"), // 100MB

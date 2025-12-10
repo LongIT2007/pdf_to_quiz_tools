@@ -17,8 +17,19 @@ import {
   BookOpen,
   Download,
 } from "lucide-react";
-import { quizAPI, Quiz, QuizQuestion } from "@/lib/api";
+import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
+
+// Helper to ensure image URLs in HTML are absolute
+function ensureAbsoluteImageUrls(html: string): string {
+  if (!html) return html;
+  
+  // Replace relative image URLs with absolute ones
+  return html.replace(/src="(\/api\/images\/[^"]+)"/g, (match, path) => {
+    const absoluteUrl = imageAPI.ensureAbsoluteUrl(path);
+    return `src="${absoluteUrl}"`;
+  });
+}
 
 interface ViewQuizProps {
   params?: { id?: string };
@@ -254,7 +265,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                   </span>
                   <div 
                     className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2"
-                    dangerouslySetInnerHTML={{ __html: question.question }}
+                    dangerouslySetInnerHTML={{ __html: ensureAbsoluteImageUrls(question.question) }}
                   />
                 </CardTitle>
                 {question.points && (
