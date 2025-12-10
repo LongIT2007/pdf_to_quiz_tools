@@ -415,10 +415,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
 
                 {question.type === "gap-filling" && (
                   <div className="space-y-4">
-                    <div 
-                      className="p-4 border rounded-md bg-muted/50 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2"
-                      dangerouslySetInnerHTML={{ __html: ensureAbsoluteImageUrls(question.question) }}
-                    />
+                  
                     <div className="space-y-3">
                       {question.gaps?.map((gap, gapIndex) => (
                         <div key={gapIndex} className="space-y-2">
