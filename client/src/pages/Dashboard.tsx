@@ -108,7 +108,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="mb-6 flex gap-4">
+        <div className="mb-6 flex gap-4 flex-wrap">
           <Button onClick={() => setLocation("/upload")} size="lg">
             <Upload className="w-4 h-4 mr-2" />
             Upload PDF
@@ -116,6 +116,10 @@ export default function Dashboard() {
           <Button onClick={() => setLocation("/upload/smart")} size="lg" variant="outline">
             <Sparkles className="w-4 h-4 mr-2" />
             Smart Upload (AI)
+          </Button>
+          <Button onClick={() => setLocation("/quiz/editor")} size="lg" variant="default">
+            <BookOpen className="w-4 h-4 mr-2" />
+            Soạn Quiz Thủ Công
           </Button>
         </div>
 

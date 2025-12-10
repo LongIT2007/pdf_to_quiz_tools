@@ -32,23 +32,36 @@ export class QuizModel {
       for (let index = 0; index < quizData.questions.length; index++) {
         const question = quizData.questions[index];
         const questionId = generateQuestionId();
-        const options = question.options ? JSON.stringify(question.options) : null;
+        
+        // Prepare options JSON - includes options, matchingPairs, gaps
+        let optionsJson: any = null;
+        if (question.options) {
+          optionsJson = question.options;
+        }
+        if (question.matchingPairs) {
+          optionsJson = { ...(optionsJson || {}), matchingPairs: question.matchingPairs };
+        }
+        if (question.gaps) {
+          optionsJson = { ...(optionsJson || {}), gaps: question.gaps };
+        }
+        const options = optionsJson ? JSON.stringify(optionsJson) : null;
         
         await pool.query(`
           INSERT INTO quiz_questions (
             id, quiz_id, question, type, options, correct_answer,
-            explanation, points, question_order
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            explanation, points, question_order, image_url
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `, [
           questionId,
           id,
           question.question,
           question.type,
           options,
-          String(question.correctAnswer),
+          typeof question.correctAnswer === 'object' ? JSON.stringify(question.correctAnswer) : String(question.correctAnswer),
           question.explanation || null,
           question.points || 1,
-          index
+          index,
+          question.imageUrl || null
         ]);
       }
     } else {
@@ -71,23 +84,36 @@ export class QuizModel {
       // Insert questions
       quizData.questions.forEach((question, index) => {
         const questionId = generateQuestionId();
-        const options = question.options ? JSON.stringify(question.options) : null;
+        
+        // Prepare options JSON - includes options, matchingPairs, gaps
+        let optionsJson: any = null;
+        if (question.options) {
+          optionsJson = question.options;
+        }
+        if (question.matchingPairs) {
+          optionsJson = { ...(optionsJson || {}), matchingPairs: question.matchingPairs };
+        }
+        if (question.gaps) {
+          optionsJson = { ...(optionsJson || {}), gaps: question.gaps };
+        }
+        const options = optionsJson ? JSON.stringify(optionsJson) : null;
         
         db.prepare(`
           INSERT INTO quiz_questions (
             id, quiz_id, question, type, options, correct_answer,
-            explanation, points, question_order
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            explanation, points, question_order, image_url
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
           questionId,
           id,
           question.question,
           question.type,
           options,
-          String(question.correctAnswer),
+          typeof question.correctAnswer === 'object' ? JSON.stringify(question.correctAnswer) : String(question.correctAnswer),
           question.explanation || null,
           question.points || 1,
-          index
+          index,
+          question.imageUrl || null
         );
       });
     }
@@ -116,15 +142,56 @@ export class QuizModel {
         [id]
       );
       
-      const questions: QuizQuestion[] = questionResult.rows.map((row) => ({
-        id: row.id,
-        question: row.question,
-        type: row.type as QuizQuestion["type"],
-        options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options) : row.options) : undefined,
-        correctAnswer: row.type === "multiple-choice" ? Number(row.correct_answer) : row.correct_answer,
-        explanation: row.explanation || undefined,
-        points: row.points,
-      }));
+      const questions: QuizQuestion[] = questionResult.rows.map((row) => {
+        let correctAnswer: any = row.correct_answer;
+        try {
+          // Try to parse as JSON for complex answer types
+          const parsed = JSON.parse(row.correct_answer);
+          correctAnswer = parsed;
+        } catch {
+          // If not JSON, handle based on question type
+          if (row.type === "multiple-choice") {
+            correctAnswer = Number(row.correct_answer);
+          } else {
+            correctAnswer = row.correct_answer;
+          }
+        }
+        
+        // Parse options JSON
+        let options: string[] | undefined;
+        let matchingPairs: { left: string; right: string }[] | undefined;
+        let gaps: { position: number; correctAnswer: string; options?: string[] }[] | undefined;
+        
+        if (row.options) {
+          const parsedOptions = typeof row.options === 'string' ? JSON.parse(row.options) : row.options;
+          if (Array.isArray(parsedOptions)) {
+            options = parsedOptions;
+          } else if (typeof parsedOptions === 'object') {
+            if (parsedOptions.matchingPairs) {
+              matchingPairs = parsedOptions.matchingPairs;
+            }
+            if (parsedOptions.gaps) {
+              gaps = parsedOptions.gaps;
+            }
+            if (Array.isArray(parsedOptions) || typeof parsedOptions[0] === 'string') {
+              options = parsedOptions;
+            }
+          }
+        }
+        
+        return {
+          id: row.id,
+          question: row.question,
+          type: row.type as QuizQuestion["type"],
+          options,
+          correctAnswer,
+          explanation: row.explanation || undefined,
+          points: row.points,
+          imageUrl: row.image_url || undefined,
+          matchingPairs,
+          gaps,
+        };
+      });
 
       return {
         id: quizRow.id,
@@ -224,15 +291,32 @@ export class QuizModel {
         .prepare("SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order")
         .all(quizRow.id) as any[];
 
-      const questions: QuizQuestion[] = questionRows.map((row) => ({
-        id: row.id,
-        question: row.question,
-        type: row.type as QuizQuestion["type"],
-        options: row.options ? JSON.parse(row.options) : undefined,
-        correctAnswer: row.type === "multiple-choice" ? Number(row.correct_answer) : row.correct_answer,
-        explanation: row.explanation || undefined,
-        points: row.points,
-      }));
+      const questions: QuizQuestion[] = questionRows.map((row) => {
+        let correctAnswer: any = row.correct_answer;
+        try {
+          // Try to parse as JSON for complex answer types
+          const parsed = JSON.parse(row.correct_answer);
+          correctAnswer = parsed;
+        } catch {
+          // If not JSON, handle based on question type
+          if (row.type === "multiple-choice") {
+            correctAnswer = Number(row.correct_answer);
+          } else {
+            correctAnswer = row.correct_answer;
+          }
+        }
+        
+        return {
+          id: row.id,
+          question: row.question,
+          type: row.type as QuizQuestion["type"],
+          options: row.options ? JSON.parse(row.options) : undefined,
+          correctAnswer,
+          explanation: row.explanation || undefined,
+          points: row.points,
+          imageUrl: row.image_url || undefined,
+        };
+      });
 
       return {
         id: quizRow.id,
@@ -302,15 +386,32 @@ export class QuizModel {
         .prepare("SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order")
         .all(quizRow.id) as any[];
 
-      const questions: QuizQuestion[] = questionRows.map((row) => ({
-        id: row.id,
-        question: row.question,
-        type: row.type as QuizQuestion["type"],
-        options: row.options ? JSON.parse(row.options) : undefined,
-        correctAnswer: row.type === "multiple-choice" ? Number(row.correct_answer) : row.correct_answer,
-        explanation: row.explanation || undefined,
-        points: row.points,
-      }));
+      const questions: QuizQuestion[] = questionRows.map((row) => {
+        let correctAnswer: any = row.correct_answer;
+        try {
+          // Try to parse as JSON for complex answer types
+          const parsed = JSON.parse(row.correct_answer);
+          correctAnswer = parsed;
+        } catch {
+          // If not JSON, handle based on question type
+          if (row.type === "multiple-choice") {
+            correctAnswer = Number(row.correct_answer);
+          } else {
+            correctAnswer = row.correct_answer;
+          }
+        }
+        
+        return {
+          id: row.id,
+          question: row.question,
+          type: row.type as QuizQuestion["type"],
+          options: row.options ? JSON.parse(row.options) : undefined,
+          correctAnswer,
+          explanation: row.explanation || undefined,
+          points: row.points,
+          imageUrl: row.image_url || undefined,
+        };
+      });
 
       return {
         id: quizRow.id,

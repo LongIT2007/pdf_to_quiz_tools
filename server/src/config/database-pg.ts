@@ -118,8 +118,22 @@ export async function initializePostgresDatabase() {
         explanation TEXT,
         points INTEGER DEFAULT 1,
         question_order INTEGER NOT NULL,
+        image_url TEXT,
         FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
       )
+    `);
+    
+    // Add image_url column if it doesn't exist (migration)
+    await pool.query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='quiz_questions' AND column_name='image_url'
+        ) THEN
+          ALTER TABLE quiz_questions ADD COLUMN image_url TEXT;
+        END IF;
+      END $$;
     `);
 
     // Create indexes

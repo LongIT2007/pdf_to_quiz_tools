@@ -114,4 +114,31 @@ export class QuizController {
       });
     }
   };
+
+  createManualQuiz = async (req: Request, res: Response<APIResponse>) => {
+    try {
+      const quizData = req.body;
+      
+      if (!quizData.title || !quizData.questions || !Array.isArray(quizData.questions)) {
+        return res.status(400).json({
+          success: false,
+          error: "Title and questions array are required",
+        });
+      }
+
+      const quiz = await this.quizService.createManualQuiz(quizData);
+
+      res.status(201).json({
+        success: true,
+        data: quiz,
+        message: "Quiz created successfully",
+      });
+    } catch (error: any) {
+      logger.error("Error creating manual quiz:", error);
+      res.status(error.statusCode || 500).json({
+        success: false,
+        error: error.message || "Failed to create quiz",
+      });
+    }
+  };
 }

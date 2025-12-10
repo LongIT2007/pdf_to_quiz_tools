@@ -72,4 +72,10 @@ export class QuizService {
     await QuizModel.delete(quizId);
     logger.info(`Quiz deleted: ${quizId}`);
   }
+
+  async createManualQuiz(quizData: Omit<Quiz, "id" | "createdAt" | "updatedAt">): Promise<Quiz> {
+    const savedQuiz = await QuizModel.create(quizData);
+    logger.success(`Manual quiz created: ${savedQuiz.id}`);
+    return savedQuiz;
+  }
 }

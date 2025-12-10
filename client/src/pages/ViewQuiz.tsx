@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Loader2,
   ArrowLeft,
@@ -66,8 +69,36 @@ export default function ViewQuiz(props: ViewQuizProps) {
 
       if (q.type === "multiple-choice") {
         if (userAnswer === correctAnswer) correctCount++;
+      } else if (q.type === "matching") {
+        // Compare matching answers
+        if (typeof correctAnswer === "object" && typeof userAnswer === "object") {
+          const correct = correctAnswer as Record<string, string>;
+          const user = userAnswer as Record<string, string>;
+          let allCorrect = true;
+          Object.keys(correct).forEach((key) => {
+            if (correct[key] !== user[key]) {
+              allCorrect = false;
+            }
+          });
+          if (allCorrect) correctCount++;
+        }
+      } else if (q.type === "gap-filling" && q.gaps) {
+        // Check all gaps are filled correctly
+        let allCorrect = true;
+        if (typeof userAnswer === "object") {
+          q.gaps.forEach((gap, index) => {
+            const userGapAnswer = (userAnswer as any)[index];
+            if (String(userGapAnswer || "").toLowerCase().trim() !== 
+                String(gap.correctAnswer).toLowerCase().trim()) {
+              allCorrect = false;
+            }
+          });
+        } else {
+          allCorrect = false;
+        }
+        if (allCorrect) correctCount++;
       } else {
-        if (String(userAnswer).toLowerCase() === String(correctAnswer).toLowerCase()) {
+        if (String(userAnswer).toLowerCase().trim() === String(correctAnswer).toLowerCase().trim()) {
           correctCount++;
         }
       }
@@ -92,7 +123,28 @@ export default function ViewQuiz(props: ViewQuizProps) {
     if (question.type === "multiple-choice") {
       return userAnswer === correctAnswer;
     }
-    return String(userAnswer).toLowerCase() === String(correctAnswer).toLowerCase();
+    
+    if (question.type === "matching") {
+      if (typeof correctAnswer === "object" && typeof userAnswer === "object") {
+        const correct = correctAnswer as Record<string, string>;
+        const user = userAnswer as Record<string, string>;
+        return Object.keys(correct).every((key) => correct[key] === user[key]);
+      }
+      return false;
+    }
+    
+    if (question.type === "gap-filling" && question.gaps) {
+      if (typeof userAnswer === "object") {
+        return question.gaps.every((gap, index) => {
+          const userGapAnswer = (userAnswer as any)[index];
+          return String(userGapAnswer || "").toLowerCase().trim() === 
+                 String(gap.correctAnswer).toLowerCase().trim();
+        });
+      }
+      return false;
+    }
+    
+    return String(userAnswer || "").toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
   };
 
   if (loading) {
@@ -209,6 +261,16 @@ export default function ViewQuiz(props: ViewQuizProps) {
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Display image if available */}
+                {question.imageUrl && (
+                  <div className="mb-4">
+                    <img
+                      src={question.imageUrl}
+                      alt="Question"
+                      className="max-w-full max-h-96 rounded-md border object-contain"
+                    />
+                  </div>
+                )}
                 {question.type === "multiple-choice" && question.options && (
                   <div className="space-y-2">
                     {question.options.map((option, optIndex) => {
@@ -281,6 +343,103 @@ export default function ViewQuiz(props: ViewQuizProps) {
                   </div>
                 )}
 
+                {question.type === "matching" && (
+                  <div className="space-y-4">
+                    {question.matchingPairs && question.matchingPairs.length > 0 ? (
+                      <div className="space-y-3">
+                        {question.matchingPairs.map((pair, pairIndex) => (
+                          <div key={pairIndex} className="flex items-center gap-3 p-3 border rounded-md">
+                            <span className="font-medium flex-1">{pair.left}</span>
+                            <span className="text-muted-foreground">→</span>
+                            <Select
+                              value={selectedAnswers[question.id]?.[`left-${pairIndex}`] || ""}
+                              onValueChange={(value) => {
+                                const current = selectedAnswers[question.id] || {};
+                                handleAnswerSelect(question.id, {
+                                  ...current,
+                                  [`left-${pairIndex}`]: value,
+                                });
+                              }}
+                              disabled={showResults}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Chọn đáp án..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {question.matchingPairs?.map((p, idx) => (
+                                  <SelectItem key={idx} value={p.right}>
+                                    {p.right}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">
+                        Chưa có cặp matching nào
+                      </div>
+                    )}
+                    {showResults && (
+                      <div className="text-sm text-muted-foreground">
+                        Đáp án: {JSON.stringify(question.correctAnswer)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {question.type === "gap-filling" && (
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-md bg-muted/50">
+                      <p className="whitespace-pre-wrap">{question.question}</p>
+                    </div>
+                    <div className="space-y-3">
+                      {question.gaps?.map((gap, gapIndex) => (
+                        <div key={gapIndex} className="space-y-2">
+                          <Label>Chỗ trống ở vị trí {gap.position}</Label>
+                          <Input
+                            value={selectedAnswers[question.id]?.[gapIndex] || ""}
+                            onChange={(e) => {
+                              const current = selectedAnswers[question.id] || {};
+                              handleAnswerSelect(question.id, {
+                                ...current,
+                                [gapIndex]: e.target.value,
+                              });
+                            }}
+                            disabled={showResults}
+                            placeholder="Nhập từ cần điền..."
+                          />
+                          {showResults && (
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Đáp án: </span>
+                              <span className="font-semibold">{gap.correctAnswer}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {question.type === "short-answer" && (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={selectedAnswers[question.id] || ""}
+                      onChange={(e) => handleAnswerSelect(question.id, e.target.value)}
+                      disabled={showResults}
+                      placeholder="Nhập câu trả lời..."
+                      rows={4}
+                    />
+                    {showResults && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Đáp án mẫu: </span>
+                        <span className="font-semibold">{question.correctAnswer}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {showResults && question.explanation && (
                   <Alert>
                     <HelpCircle className="h-4 w-4" />
@@ -296,7 +455,6 @@ export default function ViewQuiz(props: ViewQuizProps) {
           <div className="mt-8 flex justify-center">
             <Button
               onClick={handleSubmit}
-              disabled={Object.keys(selectedAnswers).length < quiz.questions.length}
               size="lg"
             >
               Nộp bài

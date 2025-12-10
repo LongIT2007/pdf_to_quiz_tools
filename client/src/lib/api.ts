@@ -27,11 +27,14 @@ export interface PDFDocument {
 export interface QuizQuestion {
   id: string;
   question: string;
-  type: "multiple-choice" | "true-false" | "fill-blank" | "short-answer";
+  type: "multiple-choice" | "true-false" | "fill-blank" | "short-answer" | "matching" | "gap-filling";
   options?: string[];
-  correctAnswer: string | number;
+  correctAnswer: string | number | number[] | Record<string, string>;
   explanation?: string;
   points?: number;
+  imageUrl?: string;
+  matchingPairs?: { left: string; right: string }[];
+  gaps?: { position: number; correctAnswer: string; options?: string[] }[];
 }
 
 export interface Quiz {
@@ -154,6 +157,43 @@ export const quizAPI = {
     if (!response.data.success) {
       throw new Error(response.data.error || "Failed to delete quiz");
     }
+  },
+
+  create: async (quizData: Omit<Quiz, "id" | "createdAt" | "updatedAt">): Promise<Quiz> => {
+    const response = await api.post<APIResponse<Quiz>>("/quizzes/create", quizData);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to create quiz");
+    }
+    return response.data.data!;
+  },
+};
+
+// Image API
+export const imageAPI = {
+  upload: async (file: File): Promise<{ url: string; filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await api.post<APIResponse<{ url: string; filename: string; size: number }>>(
+      "/images/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to upload image");
+    }
+
+    return response.data.data!;
+  },
+
+  getUrl: (filename: string): string => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    return `${API_BASE_URL}/api/images/${filename}`;
   },
 };
 

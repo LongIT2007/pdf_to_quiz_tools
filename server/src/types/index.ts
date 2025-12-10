@@ -3,11 +3,16 @@
 export interface QuizQuestion {
   id: string;
   question: string;
-  type: "multiple-choice" | "true-false" | "fill-blank" | "short-answer";
+  type: "multiple-choice" | "true-false" | "fill-blank" | "short-answer" | "matching" | "gap-filling";
   options?: string[]; // Cho multiple-choice
-  correctAnswer: string | number; // Index cho multiple-choice hoặc answer cho các loại khác
+  correctAnswer: string | number | number[] | Record<string, string>; // Index cho multiple-choice, string cho fill-blank, array cho multiple correct, object cho matching
   explanation?: string;
   points?: number;
+  imageUrl?: string; // URL hình ảnh cho câu hỏi
+  // Cho matching questions
+  matchingPairs?: { left: string; right: string }[];
+  // Cho gap-filling với nhiều chỗ trống
+  gaps?: { position: number; correctAnswer: string; options?: string[] }[];
 }
 
 export interface Quiz {
