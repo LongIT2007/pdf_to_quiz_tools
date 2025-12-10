@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, Plus, Trash2, Image as ImageIcon, Save, X } from "lucide-react";
 import { quizAPI, imageAPI, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
+import { QuestionEditor } from "@/components/QuestionEditor";
 
 interface QuestionEditor {
   id: string;
@@ -386,13 +387,15 @@ export default function EditorQuiz() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Câu hỏi *</Label>
-                  <Textarea
+                  <div className="text-xs text-muted-foreground mb-2">
+                    💡 Mẹo: Bạn có thể dán ảnh trực tiếp vào ô này bằng Ctrl+V (Windows) hoặc Cmd+V (Mac)
+                  </div>
+                  <QuestionEditor
                     value={question.question}
-                    onChange={(e) =>
-                      updateQuestion(question.id, { question: e.target.value })
+                    onChange={(value) =>
+                      updateQuestion(question.id, { question: value })
                     }
-                    placeholder="Nhập nội dung câu hỏi..."
-                    rows={3}
+                    placeholder="Nhập nội dung câu hỏi... (có thể dán ảnh bằng Ctrl+V)"
                   />
                 </div>
 

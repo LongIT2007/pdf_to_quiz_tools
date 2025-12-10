@@ -252,7 +252,10 @@ export default function ViewQuiz(props: ViewQuizProps) {
                   <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
                     {index + 1}
                   </span>
-                  <span className="flex-1">{question.question}</span>
+                  <div 
+                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2"
+                    dangerouslySetInnerHTML={{ __html: question.question }}
+                  />
                 </CardTitle>
                 {question.points && (
                   <CardDescription>
