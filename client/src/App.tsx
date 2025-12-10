@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useRoute } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Navigation from "./components/Navigation";
@@ -12,6 +12,11 @@ import CreateQuiz from "./pages/CreateQuiz";
 import SmartCreateQuiz from "./pages/SmartCreateQuiz";
 import ViewQuiz from "./pages/ViewQuiz";
 
+// Wrapper component để nhận params từ wouter Route
+function ViewQuizWrapper() {
+  const [, params] = useRoute("/quiz/:id");
+  return <ViewQuiz params={params} />;
+}
 
 function Router() {
   return (
@@ -21,9 +26,7 @@ function Router() {
       <Route path={"/upload/smart"} component={SmartUpload} />
       <Route path={"/quiz/create"} component={CreateQuiz} />
       <Route path={"/quiz/smart-create"} component={SmartCreateQuiz} />
-      <Route path={"/quiz/:id">
-        {(params) => <ViewQuiz params={params} />}
-      </Route>
+      <Route path={"/quiz/:id"} component={ViewQuizWrapper} />
       <Route path={"/pdfs"} component={Dashboard} />
       <Route path={"/quizzes"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />
