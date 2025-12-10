@@ -90,16 +90,33 @@ export class PDFModel {
     };
   }
 
-  static findById(id: string): PDFDocument | null {
-    const db = getDb();
+  static async findById(id: string): Promise<PDFDocument | null> {
     const dbType = getDbType();
     
     if (dbType === "postgres") {
-      // PostgreSQL requires async, but this method is called synchronously
-      // For now, throw error to indicate async is needed
-      throw new Error("findById with PostgreSQL requires async. Use async version.");
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      const result = await pool.query("SELECT * FROM pdf_documents WHERE id = $1", [id]);
+      
+      if (result.rows.length === 0) return null;
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        filename: row.filename,
+        originalName: row.original_name,
+        filePath: row.file_path,
+        fileSize: row.file_size,
+        mimeType: row.mime_type,
+        uploadDate: new Date(row.upload_date),
+        status: row.status,
+        extractedText: row.extracted_text,
+        pageCount: row.page_count,
+        errorMessage: row.error_message,
+      };
     }
     
+    const db = getDb();
     const row = db.prepare("SELECT * FROM pdf_documents WHERE id = ?").get(id) as any;
     
     if (!row) return null;
@@ -119,16 +136,33 @@ export class PDFModel {
     };
   }
 
-  static findAll(limit = 50, offset = 0): PDFDocument[] {
-    const db = getDb();
+  static async findAll(limit = 50, offset = 0): Promise<PDFDocument[]> {
     const dbType = getDbType();
     
     if (dbType === "postgres") {
-      // PostgreSQL requires async, but this method is called synchronously
-      // For now, throw error to indicate async is needed
-      throw new Error("findAll with PostgreSQL requires async. Use async version.");
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      const result = await pool.query(
+        "SELECT * FROM pdf_documents ORDER BY upload_date DESC LIMIT $1 OFFSET $2",
+        [limit, offset]
+      );
+      
+      return result.rows.map((row) => ({
+        id: row.id,
+        filename: row.filename,
+        originalName: row.original_name,
+        filePath: row.file_path,
+        fileSize: row.file_size,
+        mimeType: row.mime_type,
+        uploadDate: new Date(row.upload_date),
+        status: row.status,
+        extractedText: row.extracted_text,
+        pageCount: row.page_count,
+        errorMessage: row.error_message,
+      }));
     }
     
+    const db = getDb();
     const rows = db
       .prepare("SELECT * FROM pdf_documents ORDER BY upload_date DESC LIMIT ? OFFSET ?")
       .all(limit, offset) as any[];
@@ -148,67 +182,87 @@ export class PDFModel {
     }));
   }
 
-  static update(id: string, updates: Partial<PDFDocument>): PDFDocument | null {
-    const db = getDb();
+  static async update(id: string, updates: Partial<PDFDocument>): Promise<PDFDocument | null> {
     const dbType = getDbType();
     const updatesList: string[] = [];
     const values: any[] = [];
 
-    if (dbType === "postgres") {
-      // PostgreSQL requires async, but this method is called synchronously
-      // For now, throw error to indicate async is needed
-      throw new Error("update with PostgreSQL requires async. Use async version.");
-    }
-
     if (updates.status !== undefined) {
-      updatesList.push("status = ?");
+      if (dbType === "postgres") {
+        updatesList.push(`status = $${updatesList.length + 1}`);
+      } else {
+        updatesList.push("status = ?");
+      }
       values.push(updates.status);
     }
     if (updates.extractedText !== undefined) {
-      updatesList.push("extracted_text = ?");
+      if (dbType === "postgres") {
+        updatesList.push(`extracted_text = $${updatesList.length + 1}`);
+      } else {
+        updatesList.push("extracted_text = ?");
+      }
       values.push(updates.extractedText);
     }
     if (updates.pageCount !== undefined) {
-      updatesList.push("page_count = ?");
+      if (dbType === "postgres") {
+        updatesList.push(`page_count = $${updatesList.length + 1}`);
+      } else {
+        updatesList.push("page_count = ?");
+      }
       values.push(updates.pageCount);
     }
     if (updates.errorMessage !== undefined) {
-      updatesList.push("error_message = ?");
+      if (dbType === "postgres") {
+        updatesList.push(`error_message = $${updatesList.length + 1}`);
+      } else {
+        updatesList.push("error_message = ?");
+      }
       values.push(updates.errorMessage);
     }
 
-    if (updatesList.length === 0) return this.findById(id);
+    if (updatesList.length === 0) return await this.findById(id);
 
-    values.push(id);
-    db.prepare(`UPDATE pdf_documents SET ${updatesList.join(", ")} WHERE id = ?`).run(...values);
+    if (dbType === "postgres") {
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      values.push(id);
+      const query = `UPDATE pdf_documents SET ${updatesList.join(", ")} WHERE id = $${values.length}`;
+      await pool.query(query, values);
+    } else {
+      const db = getDb();
+      values.push(id);
+      db.prepare(`UPDATE pdf_documents SET ${updatesList.join(", ")} WHERE id = ?`).run(...values);
+    }
 
-    return this.findById(id);
+    return await this.findById(id);
   }
 
-  static delete(id: string): boolean {
-    const db = getDb();
+  static async delete(id: string): Promise<boolean> {
     const dbType = getDbType();
     
     if (dbType === "postgres") {
-      // PostgreSQL requires async, but this method is called synchronously
-      // For now, throw error to indicate async is needed
-      throw new Error("delete with PostgreSQL requires async. Use async version.");
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      const result = await pool.query("DELETE FROM pdf_documents WHERE id = $1", [id]);
+      return (result.rowCount ?? 0) > 0;
     }
     
+    const db = getDb();
     const result = db.prepare("DELETE FROM pdf_documents WHERE id = ?").run(id);
     return result.changes > 0;
   }
 
-  static count(): number {
-    const db = getDb();
+  static async count(): Promise<number> {
     const dbType = getDbType();
     
     if (dbType === "postgres") {
-      // PostgreSQL requires async, but this method is called synchronously
-      // For now, throw error to indicate async is needed
-      throw new Error("count with PostgreSQL requires async. Use async version.");
+      const { getPostgresPool } = await import("../config/database-pg");
+      const pool = getPostgresPool();
+      const result = await pool.query("SELECT COUNT(*) as count FROM pdf_documents");
+      return parseInt(result.rows[0].count);
     }
     
+    const db = getDb();
     const result = db.prepare("SELECT COUNT(*) as count FROM pdf_documents").get() as any;
     return result.count;
   }

@@ -3,7 +3,29 @@ import Database from "better-sqlite3";
 import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
 
-const dbType = process.env.DATABASE_TYPE || "sqlite";
+// Auto-detect database type: if DATABASE_URL exists, use PostgreSQL; otherwise use SQLite
+function getDatabaseType(): string {
+  // Explicit DATABASE_TYPE takes precedence
+  if (process.env.DATABASE_TYPE) {
+    console.log(`📊 Using database type from DATABASE_TYPE: ${process.env.DATABASE_TYPE}`);
+    return process.env.DATABASE_TYPE;
+  }
+  
+  // Auto-detect: if DATABASE_URL exists and contains postgres/postgresql, assume PostgreSQL
+  if (process.env.DATABASE_URL) {
+    const dbUrl = process.env.DATABASE_URL.toLowerCase();
+    if (dbUrl.includes('postgresql://') || dbUrl.includes('postgres://')) {
+      console.log('📊 Auto-detected PostgreSQL from DATABASE_URL');
+      return "postgres";
+    }
+  }
+  
+  // Default to SQLite
+  console.log('📊 Using default database type: SQLite');
+  return "sqlite";
+}
+
+const dbType = getDatabaseType();
 
 let sqliteDb: Database.Database | null = null;
 

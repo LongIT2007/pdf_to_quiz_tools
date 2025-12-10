@@ -1,10 +1,24 @@
 // Quiz Model
-import db from "../config/database";
+import { getDbType, getDatabase } from "../config/database";
 import { Quiz, QuizQuestion } from "../types";
 import { generateQuizId, generateQuestionId } from "../utils/id";
 
+// Get database instance
+function getDb() {
+  const dbType = getDbType();
+  
+  if (dbType === "postgres") {
+    // PostgreSQL requires async, but this model uses sync methods
+    // For now, throw error to indicate async is needed
+    throw new Error("QuizModel with PostgreSQL requires async methods. Use async version.");
+  }
+  
+  return getDatabase();
+}
+
 export class QuizModel {
   static create(quizData: Omit<Quiz, "id" | "createdAt" | "updatedAt">): Quiz {
+    const db = getDb();
     const id = generateQuizId();
     const now = new Date();
     const metadata = quizData.metadata ? JSON.stringify(quizData.metadata) : null;
@@ -55,6 +69,7 @@ export class QuizModel {
   }
 
   static findById(id: string): Quiz | null {
+    const db = getDb();
     const quizRow = db.prepare("SELECT * FROM quizzes WHERE id = ?").get(id) as any;
     
     if (!quizRow) return null;
@@ -86,6 +101,7 @@ export class QuizModel {
   }
 
   static findAll(limit = 50, offset = 0): Quiz[] {
+    const db = getDb();
     const quizRows = db
       .prepare("SELECT * FROM quizzes ORDER BY created_at DESC LIMIT ? OFFSET ?")
       .all(limit, offset) as any[];
@@ -119,6 +135,7 @@ export class QuizModel {
   }
 
   static findByPDFId(pdfId: string): Quiz[] {
+    const db = getDb();
     const quizRows = db
       .prepare("SELECT * FROM quizzes WHERE pdf_id = ? ORDER BY created_at DESC")
       .all(pdfId) as any[];
@@ -152,11 +169,13 @@ export class QuizModel {
   }
 
   static delete(id: string): boolean {
+    const db = getDb();
     const result = db.prepare("DELETE FROM quizzes WHERE id = ?").run(id);
     return result.changes > 0;
   }
 
   static count(): number {
+    const db = getDb();
     const result = db.prepare("SELECT COUNT(*) as count FROM quizzes").get() as any;
     return result.count;
   }

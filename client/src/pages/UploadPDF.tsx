@@ -26,9 +26,9 @@ export default function UploadPDF() {
       return;
     }
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError("File quá lớn. Kích thước tối đa là 10MB");
+    // Validate file size (100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      setError("File quá lớn. Kích thước tối đa là 100MB");
       return;
     }
 
@@ -159,7 +159,7 @@ export default function UploadPDF() {
                       <Button type="button">Chọn File</Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Hỗ trợ: PDF • Tối đa 10MB
+                      Hỗ trợ: PDF • Tối đa 100MB
                     </p>
                   </div>
                 )}

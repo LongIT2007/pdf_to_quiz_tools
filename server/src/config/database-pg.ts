@@ -10,6 +10,10 @@ export function getPostgresPool(): Pool {
     if (!connectionString) {
       throw new Error('DATABASE_URL is required for PostgreSQL');
     }
+    
+    // Log connection info (mask password for security)
+    const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@');
+    console.log(`🔌 Connecting to PostgreSQL: ${maskedUrl}`);
 
     // Fix: If DATABASE_URL doesn't have protocol, try to construct it
     // This handles cases where only host:port is provided

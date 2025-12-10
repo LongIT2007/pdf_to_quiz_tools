@@ -58,8 +58,8 @@ export default function SmartUpload() {
           continue;
         }
         
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error(`${file.name} quá lớn (>10MB)`);
+        if (file.size > 100 * 1024 * 1024) {
+          toast.error(`${file.name} quá lớn (>100MB)`);
           continue;
         }
 
@@ -106,8 +106,8 @@ export default function SmartUpload() {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError("File quá lớn. Kích thước tối đa là 10MB");
+    if (file.size > 100 * 1024 * 1024) {
+      setError("File quá lớn. Kích thước tối đa là 100MB");
       return;
     }
 
