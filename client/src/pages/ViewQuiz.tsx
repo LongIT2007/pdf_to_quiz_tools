@@ -18,6 +18,7 @@ import {
   BookOpen,
   Download,
   Edit,
+  ArrowUp,
 } from "lucide-react";
 import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
@@ -127,6 +128,13 @@ export default function ViewQuiz(props: ViewQuizProps) {
     setSelectedAnswers({});
     setShowResults(false);
     setScore(0);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const isCorrect = (question: QuizQuestion) => {
@@ -388,32 +396,50 @@ export default function ViewQuiz(props: ViewQuizProps) {
                             );
                           }
                           
+                          // Lấy đáp án đúng cho cặp này
+                          const correctAnswerKey = `left-${pairIndex}`;
+                          const correctAnswer = typeof question.correctAnswer === 'object' && question.correctAnswer !== null && !Array.isArray(question.correctAnswer)
+                            ? (question.correctAnswer as Record<string, string>)[correctAnswerKey]
+                            : null;
+                          
+                          // Kiểm tra xem đáp án người dùng chọn có đúng không
+                          const userAnswer = selectedAnswers[question.id]?.[correctAnswerKey];
+                          const isCorrect = userAnswer === correctAnswer;
+                          
                           return (
-                            <div key={pairIndex} className="flex items-center gap-3 p-3 border rounded-md">
-                              <span className="font-medium flex-1">{pair.left}</span>
-                              <span className="text-muted-foreground">→</span>
-                              <Select
-                                value={selectedAnswers[question.id]?.[`left-${pairIndex}`] || ""}
-                                onValueChange={(value) => {
-                                  const current = selectedAnswers[question.id] || {};
-                                  handleAnswerSelect(question.id, {
-                                    ...current,
-                                    [`left-${pairIndex}`]: value,
-                                  });
-                                }}
-                                disabled={showResults}
-                              >
-                                <SelectTrigger className="flex-1">
-                                  <SelectValue placeholder="Chọn đáp án..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {availableOptions.map((option, idx) => (
-                                    <SelectItem key={idx} value={option}>
-                                      {option}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                            <div key={pairIndex} className="space-y-2">
+                              <div className="flex items-center gap-3 p-3 border rounded-md">
+                                <span className="font-medium flex-1">{pair.left}</span>
+                                <span className="text-muted-foreground">→</span>
+                                <Select
+                                  value={selectedAnswers[question.id]?.[`left-${pairIndex}`] || ""}
+                                  onValueChange={(value) => {
+                                    const current = selectedAnswers[question.id] || {};
+                                    handleAnswerSelect(question.id, {
+                                      ...current,
+                                      [`left-${pairIndex}`]: value,
+                                    });
+                                  }}
+                                  disabled={showResults}
+                                >
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="Chọn đáp án..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableOptions.map((option, idx) => (
+                                      <SelectItem key={idx} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {showResults && correctAnswer && (
+                                <div className="text-sm pl-3">
+                                  <span className="text-muted-foreground">Đáp án đúng: </span>
+                                  <span className="font-semibold text-green-600">{correctAnswer}</span>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -421,11 +447,6 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     ) : (
                       <div className="text-muted-foreground">
                         Chưa có cặp matching nào
-                      </div>
-                    )}
-                    {showResults && (
-                      <div className="text-sm text-muted-foreground">
-                        Đáp án: {JSON.stringify(question.correctAnswer)}
                       </div>
                     )}
                   </div>
@@ -498,6 +519,21 @@ export default function ViewQuiz(props: ViewQuizProps) {
               size="lg"
             >
               Nộp bài
+            </Button>
+          </div>
+        )}
+
+        {/* Scroll to Top Button - chỉ hiển thị sau khi nộp bài */}
+        {showResults && (
+          <div className="fixed bottom-8 right-8 z-50">
+            <Button
+              onClick={scrollToTop}
+              size="lg"
+              className="rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+              title="Cuộn lên đầu trang"
+            >
+              <ArrowUp className="w-5 h-5 mr-2" />
+              Xem đáp án
             </Button>
           </div>
         )}
