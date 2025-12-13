@@ -172,6 +172,9 @@ importers:
       react-resizable-panels:
         specifier: ^3.0.6
         version: 3.0.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react-sketch-canvas:
+        specifier: ^6.2.0
+        version: 6.2.0(react@19.2.1)
       recharts:
         specifier: ^2.15.2
         version: 2.15.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -3574,6 +3577,12 @@ packages:
       react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
       react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
+  react-sketch-canvas@6.2.0:
+    resolution: {integrity: sha512-Z56RQN0viV9W3Y+DpZfQMi2lf3pO+UB4l+cMwnx7j7pQ9WHkQwN+qZKVFGANgpjXQMyY42NODF/DXjuKPCMf1w==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16.8'
+
   react-smooth@4.0.4:
     resolution: {integrity: sha512-gnGKTpYwqL0Iii09gHobNolvX4Kiq4PKx6eWBCYYix+8cdw+cGo3do906l1NBPKkSWx1DghC1dlWG9L2uGd61Q==}
     peerDependencies:
@@ -4436,8 +4445,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.3.0
       '@ckeditor/ckeditor5-widget': 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-cloud-services@47.3.0':
     dependencies:
@@ -4467,8 +4474,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.3.0
       '@ckeditor/ckeditor5-watchdog': 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-easy-image@47.3.0':
     dependencies:
@@ -4553,16 +4558,12 @@ snapshots:
     dependencies:
       '@ckeditor/ckeditor5-utils': 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-enter@47.3.0':
     dependencies:
       '@ckeditor/ckeditor5-core': 47.3.0
       '@ckeditor/ckeditor5-engine': 47.3.0
       '@ckeditor/ckeditor5-utils': 47.3.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-essentials@47.3.0':
     dependencies:
@@ -4641,8 +4642,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.3.0
       '@ckeditor/ckeditor5-widget': 47.3.0
       ckeditor5: 47.3.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-html-embed@47.3.0':
     dependencies:
@@ -4688,8 +4687,6 @@ snapshots:
       '@ckeditor/ckeditor5-widget': 47.3.0
       ckeditor5: 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-indent@47.3.0':
     dependencies:
@@ -4701,8 +4698,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 47.3.0
       '@ckeditor/ckeditor5-utils': 47.3.0
       ckeditor5: 47.3.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-integrations-common@2.2.3(ckeditor5@47.3.0)':
     dependencies:
@@ -4714,8 +4709,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 47.3.0
       '@ckeditor/ckeditor5-utils': 47.3.0
       ckeditor5: 47.3.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-link@47.3.0':
     dependencies:
@@ -4730,8 +4723,6 @@ snapshots:
       '@ckeditor/ckeditor5-widget': 47.3.0
       ckeditor5: 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-list@47.3.0':
     dependencies:
@@ -4745,8 +4736,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 47.3.0
       '@ckeditor/ckeditor5-utils': 47.3.0
       ckeditor5: 47.3.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-markdown-gfm@47.3.0':
     dependencies:
@@ -4793,8 +4782,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.3.0
       ckeditor5: 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-minimap@47.3.0':
     dependencies:
@@ -4932,8 +4919,6 @@ snapshots:
       color-parse: 2.0.2
       es-toolkit: 1.39.5
       vanilla-colorful: 0.7.2
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-undo@47.3.0':
     dependencies:
@@ -4952,8 +4937,6 @@ snapshots:
     dependencies:
       '@ckeditor/ckeditor5-ui': 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-watchdog@47.3.0':
     dependencies:
@@ -4962,8 +4945,6 @@ snapshots:
       '@ckeditor/ckeditor5-engine': 47.3.0
       '@ckeditor/ckeditor5-utils': 47.3.0
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-widget@47.3.0':
     dependencies:
@@ -8291,6 +8272,10 @@ snapshots:
     dependencies:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
+
+  react-sketch-canvas@6.2.0(react@19.2.1):
+    dependencies:
+      react: 19.2.1
 
   react-smooth@4.0.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:

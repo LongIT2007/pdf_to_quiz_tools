@@ -31,9 +31,12 @@ import {
   Download,
   Edit,
   ArrowUp,
+  Pencil,
 } from "lucide-react";
 import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
+import { DrawingToolbar } from "@/components/DrawingToolbar";
+import { DrawingCanvas } from "@/components/DrawingCanvas";
 
 // Helper to ensure image URLs in HTML are absolute
 function ensureAbsoluteImageUrls(html: string): string {
@@ -63,6 +66,12 @@ export default function ViewQuiz(props: ViewQuizProps) {
   );
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  
+  // Drawing tools state
+  const [drawingEnabled, setDrawingEnabled] = useState(false);
+  const [drawingColor, setDrawingColor] = useState("#ef4444");
+  const [drawingTool, setDrawingTool] = useState<"pen" | "eraser" | "underline">("pen");
+  const [clearTrigger, setClearTrigger] = useState(0);
 
   useEffect(() => {
     if (quizId) {
@@ -160,6 +169,10 @@ export default function ViewQuiz(props: ViewQuizProps) {
     });
   };
 
+  const handleClearDrawing = () => {
+    setClearTrigger(prev => prev + 1);
+  };
+
   const isCorrect = (question: QuizQuestion) => {
     const userAnswer = selectedAnswers[question.id];
     const correctAnswer = question.correctAnswer;
@@ -222,20 +235,53 @@ export default function ViewQuiz(props: ViewQuizProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="container max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background py-12 px-4 relative">
+      {/* Drawing Toolbar */}
+      {!showResults && (
+        <DrawingToolbar
+          onColorChange={setDrawingColor}
+          onToolChange={setDrawingTool}
+          onClear={handleClearDrawing}
+          currentColor={drawingColor}
+          currentTool={drawingTool}
+        />
+      )}
+      
+      {/* Drawing Canvas Overlay */}
+      {!showResults && drawingEnabled && (
+        <DrawingCanvas
+          color={drawingColor}
+          tool={drawingTool}
+          onClear={handleClearDrawing}
+          clearTrigger={clearTrigger}
+        />
+      )}
+      
+      <div className="container max-w-4xl mx-auto relative">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => setLocation("/quizzes")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại
           </Button>
-          <Button
-            onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
-            variant="outline"
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Chỉnh sửa
-          </Button>
+          <div className="flex gap-2">
+            {!showResults && (
+              <Button
+                onClick={() => setDrawingEnabled(!drawingEnabled)}
+                variant={drawingEnabled ? "default" : "outline"}
+                size="sm"
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                {drawingEnabled ? "Tắt vẽ" : "Bật vẽ"}
+              </Button>
+            )}
+            <Button
+              onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
+              variant="outline"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Chỉnh sửa
+            </Button>
+          </div>
         </div>
 
         <div className="mb-8">
