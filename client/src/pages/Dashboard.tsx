@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -25,7 +31,7 @@ export default function Dashboard() {
   const [pdfs, setPdfs] = useState<PDFDocument[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("pdfs");
+  const [activeTab, setActiveTab] = useState("quizzes");
 
   useEffect(() => {
     loadData();
@@ -41,7 +47,9 @@ export default function Dashboard() {
       setPdfs(pdfsData?.data || []);
       setQuizzes(quizzesData?.data || []);
     } catch (err: any) {
-      toast.error("Lỗi khi tải dữ liệu: " + (err.message || "Lỗi không xác định"));
+      toast.error(
+        "Lỗi khi tải dữ liệu: " + (err.message || "Lỗi không xác định")
+      );
     } finally {
       setLoading(false);
     }
@@ -52,7 +60,7 @@ export default function Dashboard() {
 
     try {
       await pdfAPI.delete(id);
-      setPdfs((prev) => prev.filter((p) => p.id !== id));
+      setPdfs(prev => prev.filter(p => p.id !== id));
       toast.success("Xóa PDF thành công");
     } catch (err: any) {
       toast.error("Lỗi khi xóa: " + (err.message || "Lỗi không xác định"));
@@ -64,7 +72,7 @@ export default function Dashboard() {
 
     try {
       await quizAPI.delete(id);
-      setQuizzes((prev) => prev.filter((q) => q.id !== id));
+      setQuizzes(prev => prev.filter(q => q.id !== id));
       toast.success("Xóa quiz thành công");
     } catch (err: any) {
       toast.error("Lỗi khi xóa: " + (err.message || "Lỗi không xác định"));
@@ -77,10 +85,10 @@ export default function Dashboard() {
     // Examples:
     // - "Test 1 Reading (B1 Preliminary 1)"
     // - "Test 1 Listening (b1_preliminary_2_for_the_revised_2020_exam)"
-    
+
     const testMatch = title.match(/Test\s+(\d+)/i);
     const testNumber = testMatch ? parseInt(testMatch[1], 10) : 0;
-    
+
     // Extract type (Reading, Listening, etc.)
     let type = "";
     if (title.match(/\bReading\b/i)) type = "Reading";
@@ -88,11 +96,11 @@ export default function Dashboard() {
     else if (title.match(/\bWriting\b/i)) type = "Writing";
     else if (title.match(/\bSpeaking\b/i)) type = "Speaking";
     else type = "Other";
-    
+
     // Extract group (content in parentheses)
     const groupMatch = title.match(/\(([^)]+)\)/);
     const group = groupMatch ? groupMatch[1] : "";
-    
+
     return { testNumber, type, group, originalTitle: title };
   };
 
@@ -100,31 +108,31 @@ export default function Dashboard() {
   const sortedQuizzes = [...quizzes].sort((a, b) => {
     const parsedA = parseQuizTitle(a.title);
     const parsedB = parseQuizTitle(b.title);
-    
+
     // 1. Sort by group (alphabetically)
     if (parsedA.group !== parsedB.group) {
       return parsedA.group.localeCompare(parsedB.group);
     }
-    
+
     // 2. Within same group, sort by type (Reading, Listening, Writing, Speaking, Other)
     const typeOrder: Record<string, number> = {
-      "Reading": 1,
-      "Listening": 2,
-      "Writing": 3,
-      "Speaking": 4,
-      "Other": 5,
+      Reading: 1,
+      Listening: 2,
+      Writing: 3,
+      Speaking: 4,
+      Other: 5,
     };
     const typeA = typeOrder[parsedA.type] || 99;
     const typeB = typeOrder[parsedB.type] || 99;
     if (typeA !== typeB) {
       return typeA - typeB;
     }
-    
+
     // 3. Within same group and type, sort by test number
     if (parsedA.testNumber !== parsedB.testNumber) {
       return parsedA.testNumber - parsedB.testNumber;
     }
-    
+
     // 4. Fallback to original title
     return parsedA.originalTitle.localeCompare(parsedB.originalTitle);
   });
@@ -172,11 +180,19 @@ export default function Dashboard() {
             <Upload className="w-4 h-4 mr-2" />
             Upload PDF
           </Button>
-          <Button onClick={() => setLocation("/upload/smart")} size="lg" variant="outline">
+          <Button
+            onClick={() => setLocation("/upload/smart")}
+            size="lg"
+            variant="outline"
+          >
             <Sparkles className="w-4 h-4 mr-2" />
             Smart Upload (AI)
           </Button>
-          <Button onClick={() => setLocation("/quiz/editor")} size="lg" variant="default">
+          <Button
+            onClick={() => setLocation("/quiz/editor")}
+            size="lg"
+            variant="default"
+          >
             <BookOpen className="w-4 h-4 mr-2" />
             Soạn Quiz Thủ Công
           </Button>
@@ -184,13 +200,13 @@ export default function Dashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="pdfs">
-              <FileText className="w-4 h-4 mr-2" />
-              PDFs ({pdfs.length})
-            </TabsTrigger>
             <TabsTrigger value="quizzes">
               <BookOpen className="w-4 h-4 mr-2" />
               Quizzes ({quizzes.length})
+            </TabsTrigger>
+            <TabsTrigger value="pdfs">
+              <FileText className="w-4 h-4 mr-2" />
+              PDFs ({pdfs.length})
             </TabsTrigger>
           </TabsList>
 
@@ -215,7 +231,7 @@ export default function Dashboard() {
               </Card>
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
-                {pdfs.map((pdf) => (
+                {pdfs.map(pdf => (
                   <Card key={pdf.id}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -236,7 +252,9 @@ export default function Dashboard() {
                         {pdf.status === "completed" && (
                           <Button
                             size="sm"
-                            onClick={() => setLocation(`/quiz/create?pdfId=${pdf.id}`)}
+                            onClick={() =>
+                              setLocation(`/quiz/create?pdfId=${pdf.id}`)
+                            }
                             className="flex-1"
                           >
                             <Sparkles className="w-4 h-4 mr-2" />
@@ -282,7 +300,7 @@ export default function Dashboard() {
                 {(() => {
                   // Group quizzes by group name
                   const grouped: Record<string, Quiz[]> = {};
-                  sortedQuizzes.forEach((quiz) => {
+                  sortedQuizzes.forEach(quiz => {
                     const parsed = parseQuizTitle(quiz.title);
                     const groupKey = parsed.group || "Khác";
                     if (!grouped[groupKey]) {
@@ -291,65 +309,76 @@ export default function Dashboard() {
                     grouped[groupKey].push(quiz);
                   });
 
-                  return Object.entries(grouped).map(([groupName, groupQuizzes]) => (
-                    <div key={groupName} className="space-y-4">
-                      {groupName !== "Khác" && (
-                        <div className="border-b pb-2">
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {groupName}
-                          </h3>
-                        </div>
-                      )}
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {groupQuizzes.map((quiz) => (
-                          <Card key={quiz.id}>
-                            <CardHeader>
-                              <CardTitle className="text-lg mb-2">{quiz.title}</CardTitle>
-                              <CardDescription>
-                                {quiz.description || "Không có mô tả"}
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="flex items-center justify-between mb-4">
-                                <Badge variant="outline">
-                                  {quiz.questions.length} câu hỏi
-                                </Badge>
-                                {quiz.metadata?.difficulty && (
-                                  <Badge>
-                                    {quiz.metadata.difficulty === "easy" ? "Dễ" :
-                                     quiz.metadata.difficulty === "medium" ? "Trung bình" : "Khó"}
+                  return Object.entries(grouped).map(
+                    ([groupName, groupQuizzes]) => (
+                      <div key={groupName} className="space-y-4">
+                        {groupName !== "Khác" && (
+                          <div className="border-b pb-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {groupName}
+                            </h3>
+                          </div>
+                        )}
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {groupQuizzes.map(quiz => (
+                            <Card key={quiz.id}>
+                              <CardHeader>
+                                <CardTitle className="text-lg mb-2">
+                                  {quiz.title}
+                                </CardTitle>
+                                <CardDescription>
+                                  {quiz.description || "Không có mô tả"}
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="flex items-center justify-between mb-4">
+                                  <Badge variant="outline">
+                                    {quiz.questions.length} câu hỏi
                                   </Badge>
-                                )}
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={() => setLocation(`/quiz/${quiz.id}`)}
-                                  className="flex-1"
-                                >
-                                  Làm Quiz
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleDeleteQuiz(quiz.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                                  {quiz.metadata?.difficulty && (
+                                    <Badge>
+                                      {quiz.metadata.difficulty === "easy"
+                                        ? "Dễ"
+                                        : quiz.metadata.difficulty === "medium"
+                                          ? "Trung bình"
+                                          : "Khó"}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      setLocation(`/quiz/${quiz.id}`)
+                                    }
+                                    className="flex-1"
+                                  >
+                                    Làm Quiz
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      setLocation(`/quiz/editor/${quiz.id}`)
+                                    }
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDeleteQuiz(quiz.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ));
+                    )
+                  );
                 })()}
               </div>
             )}
