@@ -11,13 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,9 +77,8 @@ export default function ViewQuiz(props: ViewQuizProps) {
   const [clearTrigger, setClearTrigger] = useState(0);
   const quizContainerRef = useRef<HTMLDivElement>(null);
   
-  // Image zoom state
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-  const [imageZoom, setImageZoom] = useState(100);
+  // Image zoom state - store zoom level for each question image
+  const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (quizId) {
@@ -367,16 +359,9 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {index + 1}
                   </span>
                   <div
-                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2 [&_img]:cursor-pointer [&_img]:hover:opacity-90 [&_img]:transition-opacity"
+                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2"
                     dangerouslySetInnerHTML={{
                       __html: ensureAbsoluteImageUrls(question.question),
-                    }}
-                    onClick={(e) => {
-                      const target = e.target as HTMLElement;
-                      if (target.tagName === "IMG" && target.getAttribute("src")) {
-                        setZoomedImage(target.getAttribute("src")!);
-                        setImageZoom(100);
-                      }
                     }}
                   />
                 </CardTitle>
@@ -388,27 +373,78 @@ export default function ViewQuiz(props: ViewQuizProps) {
                 {/* Display image if available */}
                 {question.imageUrl && (
                   <div className="mb-4 relative group">
-                    <img
-                      src={question.imageUrl}
-                      alt="Question"
-                      className="max-w-full max-h-96 rounded-md border object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => {
-                        setZoomedImage(question.imageUrl!);
-                        setImageZoom(100);
-                      }}
-                    />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => {
-                        setZoomedImage(question.imageUrl!);
-                        setImageZoom(100);
-                      }}
-                      title="Phóng to ảnh"
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </Button>
+                    <div className="relative overflow-hidden rounded-md border bg-gray-50">
+                      <div
+                        className="flex items-center justify-center"
+                        style={{
+                          transform: `scale(${(imageZoomLevels[question.id] || 100) / 100})`,
+                          transformOrigin: "center",
+                          transition: "transform 0.2s",
+                          minHeight: "200px",
+                        }}
+                      >
+                        <img
+                          src={question.imageUrl}
+                          alt="Question"
+                          className="max-w-full max-h-96 object-contain"
+                          style={{
+                            width: "auto",
+                            height: "auto",
+                          }}
+                        />
+                      </div>
+                      {/* Zoom Controls */}
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          onClick={() => {
+                            setImageZoomLevels(prev => ({
+                              ...prev,
+                              [question.id]: Math.max(50, (prev[question.id] || 100) - 25),
+                            }));
+                          }}
+                          disabled={(imageZoomLevels[question.id] || 100) <= 50}
+                          title="Thu nhỏ"
+                        >
+                          <ZoomOut className="w-3 h-3" />
+                        </Button>
+                        <span className="text-xs font-medium min-w-[45px] text-center px-1">
+                          {imageZoomLevels[question.id] || 100}%
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          onClick={() => {
+                            setImageZoomLevels(prev => ({
+                              ...prev,
+                              [question.id]: Math.min(300, (prev[question.id] || 100) + 25),
+                            }));
+                          }}
+                          disabled={(imageZoomLevels[question.id] || 100) >= 300}
+                          title="Phóng to"
+                        >
+                          <ZoomIn className="w-3 h-3" />
+                        </Button>
+                        <Separator orientation="vertical" className="h-4 mx-1" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          onClick={() => {
+                            setImageZoomLevels(prev => ({
+                              ...prev,
+                              [question.id]: 100,
+                            }));
+                          }}
+                          title="Đặt lại"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {question.type === "multiple-choice" && question.options && (
@@ -691,62 +727,6 @@ export default function ViewQuiz(props: ViewQuizProps) {
           </Button>
         </div>
       </div>
-
-      {/* Image Zoom Dialog */}
-      <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
-          <DialogHeader className="p-4 pb-2">
-            <DialogTitle>Xem ảnh</DialogTitle>
-          </DialogHeader>
-          <div className="relative flex items-center justify-center bg-black/50 p-4">
-            <div className="relative max-w-full max-h-[80vh] overflow-auto">
-              <img
-                src={zoomedImage || ""}
-                alt="Zoomed"
-                className="max-w-full max-h-[80vh] object-contain"
-                style={{
-                  transform: `scale(${imageZoom / 100})`,
-                  transformOrigin: "center",
-                  transition: "transform 0.2s",
-                }}
-              />
-            </div>
-            {/* Zoom Controls */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImageZoom(prev => Math.max(50, prev - 25))}
-                disabled={imageZoom <= 50}
-                title="Thu nhỏ"
-              >
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-medium min-w-[60px] text-center">
-                {imageZoom}%
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImageZoom(prev => Math.min(300, prev + 25))}
-                disabled={imageZoom >= 300}
-                title="Phóng to"
-              >
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-              <Separator orientation="vertical" className="h-6 mx-1" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImageZoom(100)}
-                title="Đặt lại"
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
