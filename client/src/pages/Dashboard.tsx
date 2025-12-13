@@ -166,7 +166,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-12 px-4 ">
       <div className="container max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
@@ -314,7 +314,7 @@ export default function Dashboard() {
                       <div key={groupName} className="space-y-4">
                         {groupName !== "Khác" && (
                           <div className="border-b pb-2">
-                            <h3 className="text-lg font-semibold text-foreground">
+                            <h3 className="text-2xl font-semibold text-primary capitalize">
                               {groupName}
                             </h3>
                           </div>
