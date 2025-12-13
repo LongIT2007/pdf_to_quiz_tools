@@ -372,10 +372,21 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {question.matchingPairs && question.matchingPairs.length > 0 ? (
                       <div className="space-y-3">
                         {question.matchingPairs.map((pair, pairIndex) => {
-                          // Lấy tất cả các đáp án từ options (nếu có) hoặc từ matchingPairs
-                          const availableOptions = question.options && question.options.length > 0
-                            ? question.options
-                            : (question.matchingPairs?.map(p => p.right) || []);
+                          // Lấy tất cả các đáp án từ options (nếu có)
+                          // Nếu không có options, tự động tạo danh sách A-H (mặc định 8 đáp án)
+                          let availableOptions: string[] = [];
+                          
+                          if (question.options && question.options.length > 0) {
+                            // Dùng options đã nhập
+                            availableOptions = question.options;
+                          } else {
+                            // Tự động tạo A-H (mặc định 8 đáp án)
+                            // Hoặc có thể tạo dựa trên số matching pairs, nhưng tối đa 8 (A-H)
+                            const numOptions = Math.max(8, question.matchingPairs?.length || 8);
+                            availableOptions = Array.from({ length: Math.min(numOptions, 8) }, (_, i) => 
+                              String.fromCharCode(65 + i) // A, B, C, D, E, F, G, H
+                            );
+                          }
                           
                           return (
                             <div key={pairIndex} className="flex items-center gap-3 p-3 border rounded-md">
