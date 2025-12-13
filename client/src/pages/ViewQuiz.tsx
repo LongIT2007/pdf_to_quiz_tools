@@ -81,6 +81,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
   // Image zoom state - store zoom level and position for each question image
   const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
   const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
+  
 
   useEffect(() => {
     if (quizId) {

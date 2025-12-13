@@ -22,6 +22,7 @@ import {
   Trash2,
   Sparkles,
   Edit,
+  Shuffle,
 } from "lucide-react";
 import { pdfAPI, quizAPI, PDFDocument, Quiz } from "@/lib/api";
 import { toast } from "sonner";
@@ -196,6 +197,19 @@ export default function Dashboard() {
             <BookOpen className="w-4 h-4 mr-2" />
             Soạn Quiz Thủ Công
           </Button>
+          {quizzes.length > 0 && (
+            <Button 
+              onClick={() => {
+                const randomQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+                setLocation(`/quiz/${randomQuiz.id}`);
+              }} 
+              size="lg" 
+              variant="secondary"
+            >
+              <Shuffle className="w-4 h-4 mr-2" />
+              Quiz Ngẫu Nhiên
+            </Button>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
