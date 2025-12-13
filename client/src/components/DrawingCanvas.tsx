@@ -6,6 +6,7 @@ interface DrawingCanvasProps {
   tool: "pen" | "eraser" | "underline";
   onClear: () => void;
   clearTrigger: number;
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function DrawingCanvas({
@@ -13,9 +14,10 @@ export function DrawingCanvas({
   tool,
   onClear,
   clearTrigger,
+  containerRef: parentContainerRef,
 }: DrawingCanvasProps) {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [strokeColor, setStrokeColor] = useState(color);
   const [strokeWidth, setStrokeWidth] = useState(3);
@@ -23,24 +25,44 @@ export function DrawingCanvas({
   // Update dimensions when container size changes
   useEffect(() => {
     const updateDimensions = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
+      // Use parent container if provided, otherwise use canvas container
+      const container = parentContainerRef?.current || canvasContainerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        // Get the full height of the document
+        const documentHeight = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+        
         setDimensions({
           width: rect.width,
-          height: Math.max(rect.height, window.innerHeight),
+          height: documentHeight,
         });
       }
     };
 
     updateDimensions();
+    
+    // Use ResizeObserver for better performance
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    const container = parentContainerRef?.current || canvasContainerRef.current;
+    if (container) {
+      resizeObserver.observe(container);
+    }
+    
     window.addEventListener("resize", updateDimensions);
-    window.addEventListener("scroll", updateDimensions);
+    window.addEventListener("scroll", updateDimensions, { passive: true });
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener("resize", updateDimensions);
       window.removeEventListener("scroll", updateDimensions);
     };
-  }, []);
+  }, [parentContainerRef]);
 
   useEffect(() => {
     setStrokeColor(color);
@@ -69,17 +91,22 @@ export function DrawingCanvas({
   if (dimensions.width === 0 || dimensions.height === 0) {
     return (
       <div
-        ref={containerRef}
-        className="fixed inset-0 pointer-events-none z-40"
+        ref={canvasContainerRef}
+        className="absolute inset-0 pointer-events-none z-40"
       />
     );
   }
 
   return (
     <div
-      ref={containerRef}
-      className="fixed inset-0 pointer-events-none z-40"
-      style={{ width: "100%", height: "100%" }}
+      ref={canvasContainerRef}
+      className="absolute inset-0 pointer-events-none z-40"
+      style={{ 
+        width: "100%", 
+        height: `${dimensions.height}px`,
+        top: 0,
+        left: 0,
+      }}
     >
       <ReactSketchCanvas
         ref={canvasRef}
@@ -90,11 +117,12 @@ export function DrawingCanvas({
         canvasColor="transparent"
         className="pointer-events-auto"
         style={{
-          position: "fixed",
+          position: "absolute",
           top: 0,
           left: 0,
           width: `${dimensions.width}px`,
           height: `${dimensions.height}px`,
+          pointerEvents: "auto",
         }}
       />
     </div>

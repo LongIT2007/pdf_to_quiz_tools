@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,12 +72,37 @@ export default function ViewQuiz(props: ViewQuizProps) {
   const [drawingColor, setDrawingColor] = useState("#ef4444");
   const [drawingTool, setDrawingTool] = useState<"pen" | "eraser" | "underline">("pen");
   const [clearTrigger, setClearTrigger] = useState(0);
+  const quizContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (quizId) {
       loadQuiz();
     }
   }, [quizId]);
+
+  // Keyboard shortcut: Ctrl to toggle drawing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl key (Windows/Linux) or Cmd key (Mac)
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+        // Only toggle if not typing in input/textarea
+        const target = e.target as HTMLElement;
+        if (
+          target.tagName !== "INPUT" &&
+          target.tagName !== "TEXTAREA" &&
+          !target.isContentEditable
+        ) {
+          e.preventDefault();
+          setDrawingEnabled(prev => !prev);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const loadQuiz = async () => {
     try {
@@ -242,46 +267,36 @@ export default function ViewQuiz(props: ViewQuizProps) {
           onColorChange={setDrawingColor}
           onToolChange={setDrawingTool}
           onClear={handleClearDrawing}
+          onToggleDrawing={() => setDrawingEnabled(!drawingEnabled)}
           currentColor={drawingColor}
           currentTool={drawingTool}
+          drawingEnabled={drawingEnabled}
         />
       )}
       
-      {/* Drawing Canvas Overlay */}
-      {!showResults && drawingEnabled && (
-        <DrawingCanvas
-          color={drawingColor}
-          tool={drawingTool}
-          onClear={handleClearDrawing}
-          clearTrigger={clearTrigger}
-        />
-      )}
-      
-      <div className="container max-w-4xl mx-auto relative">
+      <div className="container max-w-4xl mx-auto relative" ref={quizContainerRef}>
+        {/* Drawing Canvas Overlay - inside container to scroll with content */}
+        {!showResults && drawingEnabled && (
+          <DrawingCanvas
+            color={drawingColor}
+            tool={drawingTool}
+            onClear={handleClearDrawing}
+            clearTrigger={clearTrigger}
+            containerRef={quizContainerRef}
+          />
+        )}
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => setLocation("/quizzes")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại
           </Button>
-          <div className="flex gap-2">
-            {!showResults && (
-              <Button
-                onClick={() => setDrawingEnabled(!drawingEnabled)}
-                variant={drawingEnabled ? "default" : "outline"}
-                size="sm"
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                {drawingEnabled ? "Tắt vẽ" : "Bật vẽ"}
-              </Button>
-            )}
-            <Button
-              onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
-              variant="outline"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Chỉnh sửa
-            </Button>
-          </div>
+          <Button
+            onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
+            variant="outline"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Chỉnh sửa
+          </Button>
         </div>
 
         <div className="mb-8">

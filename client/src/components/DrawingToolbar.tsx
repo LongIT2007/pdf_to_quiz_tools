@@ -15,8 +15,10 @@ interface DrawingToolbarProps {
   onColorChange: (color: string) => void;
   onToolChange: (tool: "pen" | "eraser" | "underline") => void;
   onClear: () => void;
+  onToggleDrawing: () => void;
   currentColor: string;
   currentTool: "pen" | "eraser" | "underline";
+  drawingEnabled: boolean;
 }
 
 const COLORS = [
@@ -34,14 +36,31 @@ export function DrawingToolbar({
   onColorChange,
   onToolChange,
   onClear,
+  onToggleDrawing,
   currentColor,
   currentTool,
+  drawingEnabled,
 }: DrawingToolbarProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 flex items-center gap-2">
-      {/* Pen Tool */}
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] bg-white/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 flex items-center gap-2 pointer-events-auto">
+      {/* Toggle Drawing Button */}
+      <Button
+        variant={drawingEnabled ? "default" : "outline"}
+        size="sm"
+        onClick={onToggleDrawing}
+        title={drawingEnabled ? "Tắt vẽ (Ctrl)" : "Bật vẽ"}
+      >
+        <Pencil className="w-4 h-4 mr-1" />
+        {drawingEnabled ? "Tắt vẽ" : "Bật vẽ"}
+      </Button>
+
+      {drawingEnabled && (
+        <>
+          <Separator orientation="vertical" className="h-6" />
+          
+          {/* Pen Tool */}
       <Button
         variant={currentTool === "pen" ? "default" : "outline"}
         size="sm"
@@ -118,17 +137,19 @@ export function DrawingToolbar({
         </PopoverContent>
       </Popover>
 
-      <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6" />
 
-      {/* Clear All */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onClear}
-        title="Xóa tất cả"
-      >
-        <Trash2 className="w-4 h-4" />
-      </Button>
+          {/* Clear All */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClear}
+            title="Xóa tất cả"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }
