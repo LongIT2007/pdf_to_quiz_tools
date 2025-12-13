@@ -40,6 +40,7 @@ import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { DrawingToolbar } from "@/components/DrawingToolbar";
 import { DrawingCanvas } from "@/components/DrawingCanvas";
+import { ZoomableImage } from "@/components/ZoomableImage";
 
 // Helper to ensure image URLs in HTML are absolute
 function ensureAbsoluteImageUrls(html: string): string {
@@ -77,8 +78,9 @@ export default function ViewQuiz(props: ViewQuizProps) {
   const [clearTrigger, setClearTrigger] = useState(0);
   const quizContainerRef = useRef<HTMLDivElement>(null);
   
-  // Image zoom state - store zoom level for each question image
+  // Image zoom state - store zoom level and position for each question image
   const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
+  const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
 
   useEffect(() => {
     if (quizId) {
@@ -372,80 +374,23 @@ export default function ViewQuiz(props: ViewQuizProps) {
               <CardContent className="space-y-4">
                 {/* Display image if available */}
                 {question.imageUrl && (
-                  <div className="mb-4 relative group">
-                    <div className="relative overflow-hidden rounded-md border bg-gray-50">
-                      <div
-                        className="flex items-center justify-center"
-                        style={{
-                          transform: `scale(${(imageZoomLevels[question.id] || 100) / 100})`,
-                          transformOrigin: "center",
-                          transition: "transform 0.2s",
-                          minHeight: "200px",
-                        }}
-                      >
-                        <img
-                          src={question.imageUrl}
-                          alt="Question"
-                          className="max-w-full max-h-96 object-contain"
-                          style={{
-                            width: "auto",
-                            height: "auto",
-                          }}
-                        />
-                      </div>
-                      {/* Zoom Controls */}
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          onClick={() => {
-                            setImageZoomLevels(prev => ({
-                              ...prev,
-                              [question.id]: Math.max(50, (prev[question.id] || 100) - 25),
-                            }));
-                          }}
-                          disabled={(imageZoomLevels[question.id] || 100) <= 50}
-                          title="Thu nhỏ"
-                        >
-                          <ZoomOut className="w-3 h-3" />
-                        </Button>
-                        <span className="text-xs font-medium min-w-[45px] text-center px-1">
-                          {imageZoomLevels[question.id] || 100}%
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          onClick={() => {
-                            setImageZoomLevels(prev => ({
-                              ...prev,
-                              [question.id]: Math.min(300, (prev[question.id] || 100) + 25),
-                            }));
-                          }}
-                          disabled={(imageZoomLevels[question.id] || 100) >= 300}
-                          title="Phóng to"
-                        >
-                          <ZoomIn className="w-3 h-3" />
-                        </Button>
-                        <Separator orientation="vertical" className="h-4 mx-1" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          onClick={() => {
-                            setImageZoomLevels(prev => ({
-                              ...prev,
-                              [question.id]: 100,
-                            }));
-                          }}
-                          title="Đặt lại"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <ZoomableImage
+                    src={question.imageUrl}
+                    alt="Question"
+                    questionId={question.id}
+                    zoomLevel={imageZoomLevels[question.id] || 100}
+                    position={imagePositions[question.id] || { x: 0, y: 0 }}
+                    onZoomChange={(id, zoom) => {
+                      setImageZoomLevels(prev => ({ ...prev, [id]: zoom }));
+                    }}
+                    onPositionChange={(id, pos) => {
+                      setImagePositions(prev => ({ ...prev, [id]: pos }));
+                    }}
+                    onReset={(id) => {
+                      setImageZoomLevels(prev => ({ ...prev, [id]: 100 }));
+                      setImagePositions(prev => ({ ...prev, [id]: { x: 0, y: 0 } }));
+                    }}
+                  />
                 )}
                 {question.type === "multiple-choice" && question.options && (
                   <div className="space-y-2">
