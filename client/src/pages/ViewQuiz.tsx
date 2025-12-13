@@ -508,7 +508,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                                   <span className="text-muted-foreground">
                                     Đáp án đúng:{" "}
                                   </span>
-                                  <span className="font-semibold text-green-600">
+                                  <span className="font-semibold">
                                     {correctAnswer}
                                   </span>
                                 </div>
