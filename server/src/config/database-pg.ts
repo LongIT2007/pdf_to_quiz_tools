@@ -42,9 +42,13 @@ export function getPostgresPool(): Pool {
         ssl: process.env.NODE_ENV === 'production' 
           ? { rejectUnauthorized: false } 
           : false,
-        max: 20,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 10000, // Increased timeout
+        max: 20, // Maximum number of clients in the pool
+        min: 2, // Minimum number of clients to keep in the pool
+        idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+        connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+        // Keep connections alive to avoid reconnection overhead
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
       });
 
       pool.on('error', (err) => {
@@ -136,13 +140,24 @@ export async function initializePostgresDatabase() {
       END $$;
     `);
 
-    // Create indexes
+    // Create indexes for better query performance
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_quizzes_pdf_id ON quizzes(pdf_id)
     `);
     
+    // Index for ORDER BY created_at DESC (used in findAll)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_quizzes_created_at ON quizzes(created_at DESC)
+    `);
+    
+    // Index for quiz_questions queries
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_id ON quiz_questions(quiz_id)
+    `);
+    
+    // Composite index for ORDER BY quiz_id, question_order (used in batch queries)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_order ON quiz_questions(quiz_id, question_order)
     `);
     
     await pool.query(`

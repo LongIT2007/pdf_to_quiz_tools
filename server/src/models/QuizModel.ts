@@ -243,40 +243,89 @@ export class QuizModel {
       const { getPostgresPool } = await import("../config/database-pg");
       const pool = getPostgresPool();
       
+      // Get all quizzes
       const quizResult = await pool.query(
         "SELECT * FROM quizzes ORDER BY created_at DESC LIMIT $1 OFFSET $2",
         [limit, offset]
       );
       
-      const quizzes: Quiz[] = [];
+      if (quizResult.rows.length === 0) {
+        return [];
+      }
       
-      for (const quizRow of quizResult.rows) {
-        const questionResult = await pool.query(
-          "SELECT * FROM quiz_questions WHERE quiz_id = $1 ORDER BY question_order",
-          [quizRow.id]
-        );
+      // Get all questions for all quizzes in one query (batch query to avoid N+1 problem)
+      const quizIds = quizResult.rows.map(row => row.id);
+      const questionResult = await pool.query(
+        `SELECT * FROM quiz_questions WHERE quiz_id = ANY($1::text[]) ORDER BY quiz_id, question_order`,
+        [quizIds]
+      );
+      
+      // Group questions by quiz_id
+      const questionsByQuizId: Record<string, QuizQuestion[]> = {};
+      questionResult.rows.forEach((row) => {
+        if (!questionsByQuizId[row.quiz_id]) {
+          questionsByQuizId[row.quiz_id] = [];
+        }
         
-        const questions: QuizQuestion[] = questionResult.rows.map((row) => ({
+        let correctAnswer: any = row.correct_answer;
+        try {
+          const parsed = JSON.parse(row.correct_answer);
+          correctAnswer = parsed;
+        } catch {
+          if (row.type === "multiple-choice") {
+            correctAnswer = Number(row.correct_answer);
+          } else {
+            correctAnswer = row.correct_answer;
+          }
+        }
+        
+        // Parse options JSON
+        let options: string[] | undefined;
+        let matchingPairs: { left: string; right: string }[] | undefined;
+        let gaps: { position: number; correctAnswer: string; options?: string[] }[] | undefined;
+        
+        if (row.options) {
+          const parsedOptions = typeof row.options === 'string' ? JSON.parse(row.options) : row.options;
+          if (Array.isArray(parsedOptions)) {
+            options = parsedOptions;
+          } else if (typeof parsedOptions === 'object') {
+            if (parsedOptions.matchingPairs) {
+              matchingPairs = parsedOptions.matchingPairs;
+            }
+            if (parsedOptions.gaps) {
+              gaps = parsedOptions.gaps;
+            }
+            if (Array.isArray(parsedOptions) || typeof parsedOptions[0] === 'string') {
+              options = parsedOptions;
+            }
+          }
+        }
+        
+        questionsByQuizId[row.quiz_id].push({
           id: row.id,
           question: row.question,
           type: row.type as QuizQuestion["type"],
-          options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options) : row.options) : undefined,
-          correctAnswer: row.type === "multiple-choice" ? Number(row.correct_answer) : row.correct_answer,
+          options,
+          correctAnswer,
           explanation: row.explanation || undefined,
           points: row.points,
-        }));
-
-        quizzes.push({
-          id: quizRow.id,
-          title: quizRow.title,
-          description: quizRow.description || undefined,
-          pdfId: quizRow.pdf_id || undefined,
-          questions,
-          createdAt: new Date(quizRow.created_at),
-          updatedAt: new Date(quizRow.updated_at),
-          metadata: quizRow.metadata ? (typeof quizRow.metadata === 'string' ? JSON.parse(quizRow.metadata) : quizRow.metadata) : undefined,
+          imageUrl: row.image_url || undefined,
+          matchingPairs,
+          gaps,
         });
-      }
+      });
+      
+      // Build quizzes array
+      const quizzes: Quiz[] = quizResult.rows.map((quizRow) => ({
+        id: quizRow.id,
+        title: quizRow.title,
+        description: quizRow.description || undefined,
+        pdfId: quizRow.pdf_id || undefined,
+        questions: questionsByQuizId[quizRow.id] || [],
+        createdAt: new Date(quizRow.created_at),
+        updatedAt: new Date(quizRow.updated_at),
+        metadata: quizRow.metadata ? (typeof quizRow.metadata === 'string' ? JSON.parse(quizRow.metadata) : quizRow.metadata) : undefined,
+      }));
       
       return quizzes;
     }
@@ -338,40 +387,89 @@ export class QuizModel {
       const { getPostgresPool } = await import("../config/database-pg");
       const pool = getPostgresPool();
       
+      // Get all quizzes for this PDF
       const quizResult = await pool.query(
         "SELECT * FROM quizzes WHERE pdf_id = $1 ORDER BY created_at DESC",
         [pdfId]
       );
       
-      const quizzes: Quiz[] = [];
+      if (quizResult.rows.length === 0) {
+        return [];
+      }
       
-      for (const quizRow of quizResult.rows) {
-        const questionResult = await pool.query(
-          "SELECT * FROM quiz_questions WHERE quiz_id = $1 ORDER BY question_order",
-          [quizRow.id]
-        );
+      // Get all questions for all quizzes in one query (batch query to avoid N+1 problem)
+      const quizIds = quizResult.rows.map(row => row.id);
+      const questionResult = await pool.query(
+        `SELECT * FROM quiz_questions WHERE quiz_id = ANY($1::text[]) ORDER BY quiz_id, question_order`,
+        [quizIds]
+      );
+      
+      // Group questions by quiz_id
+      const questionsByQuizId: Record<string, QuizQuestion[]> = {};
+      questionResult.rows.forEach((row) => {
+        if (!questionsByQuizId[row.quiz_id]) {
+          questionsByQuizId[row.quiz_id] = [];
+        }
         
-        const questions: QuizQuestion[] = questionResult.rows.map((row) => ({
+        let correctAnswer: any = row.correct_answer;
+        try {
+          const parsed = JSON.parse(row.correct_answer);
+          correctAnswer = parsed;
+        } catch {
+          if (row.type === "multiple-choice") {
+            correctAnswer = Number(row.correct_answer);
+          } else {
+            correctAnswer = row.correct_answer;
+          }
+        }
+        
+        // Parse options JSON
+        let options: string[] | undefined;
+        let matchingPairs: { left: string; right: string }[] | undefined;
+        let gaps: { position: number; correctAnswer: string; options?: string[] }[] | undefined;
+        
+        if (row.options) {
+          const parsedOptions = typeof row.options === 'string' ? JSON.parse(row.options) : row.options;
+          if (Array.isArray(parsedOptions)) {
+            options = parsedOptions;
+          } else if (typeof parsedOptions === 'object') {
+            if (parsedOptions.matchingPairs) {
+              matchingPairs = parsedOptions.matchingPairs;
+            }
+            if (parsedOptions.gaps) {
+              gaps = parsedOptions.gaps;
+            }
+            if (Array.isArray(parsedOptions) || typeof parsedOptions[0] === 'string') {
+              options = parsedOptions;
+            }
+          }
+        }
+        
+        questionsByQuizId[row.quiz_id].push({
           id: row.id,
           question: row.question,
           type: row.type as QuizQuestion["type"],
-          options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options) : row.options) : undefined,
-          correctAnswer: row.type === "multiple-choice" ? Number(row.correct_answer) : row.correct_answer,
+          options,
+          correctAnswer,
           explanation: row.explanation || undefined,
           points: row.points,
-        }));
-
-        quizzes.push({
-          id: quizRow.id,
-          title: quizRow.title,
-          description: quizRow.description || undefined,
-          pdfId: quizRow.pdf_id || undefined,
-          questions,
-          createdAt: new Date(quizRow.created_at),
-          updatedAt: new Date(quizRow.updated_at),
-          metadata: quizRow.metadata ? (typeof quizRow.metadata === 'string' ? JSON.parse(quizRow.metadata) : quizRow.metadata) : undefined,
+          imageUrl: row.image_url || undefined,
+          matchingPairs,
+          gaps,
         });
-      }
+      });
+      
+      // Build quizzes array
+      const quizzes: Quiz[] = quizResult.rows.map((quizRow) => ({
+        id: quizRow.id,
+        title: quizRow.title,
+        description: quizRow.description || undefined,
+        pdfId: quizRow.pdf_id || undefined,
+        questions: questionsByQuizId[quizRow.id] || [],
+        createdAt: new Date(quizRow.created_at),
+        updatedAt: new Date(quizRow.updated_at),
+        metadata: quizRow.metadata ? (typeof quizRow.metadata === 'string' ? JSON.parse(quizRow.metadata) : quizRow.metadata) : undefined,
+      }));
       
       return quizzes;
     }
