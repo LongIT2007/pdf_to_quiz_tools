@@ -91,6 +91,7 @@ export default function EditorQuiz(props?: EditorQuizProps) {
 
     if (type === "matching") {
       newQuestion.matchingPairs = [{ left: "", right: "" }];
+      newQuestion.options = []; // Danh sách tất cả đáp án có thể chọn (A, B, C, D, E, F, G, H...)
       newQuestion.correctAnswer = {};
     }
 
@@ -693,7 +694,33 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                 {/* Matching */}
                 {question.type === "matching" && (
                   <div className="space-y-4">
-                    <Label>Các cặp nối</Label>
+                    <div className="space-y-2">
+                      <Label>Danh sách đáp án (A, B, C, D, E, F, G, H...)</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Nhập tất cả các đáp án có thể chọn, mỗi đáp án một dòng hoặc cách nhau bằng dấu phẩy
+                      </p>
+                      <Textarea
+                        value={question.options?.join("\n") || ""}
+                        onChange={(e) => {
+                          // Parse từ textarea: mỗi dòng là một đáp án, hoặc cách nhau bằng dấu phẩy
+                          const text = e.target.value;
+                          const options = text
+                            .split(/[,\n]/)
+                            .map(opt => opt.trim())
+                            .filter(opt => opt.length > 0);
+                          updateQuestion(question.id, { options });
+                        }}
+                        placeholder="A&#10;B&#10;C&#10;D&#10;E&#10;F&#10;G&#10;H"
+                        rows={4}
+                      />
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                      <Label>Các cặp nối (đáp án đúng)</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Tạo các cặp nối: mục trái sẽ được hiển thị, mục phải là đáp án đúng (phải có trong danh sách đáp án ở trên)
+                      </p>
+                    </div>
                     {question.matchingPairs?.map((pair, pairIndex) => (
                       <div key={pairIndex} className="flex items-center gap-2">
                         <Input
@@ -720,7 +747,7 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                               e.target.value
                             )
                           }
-                          placeholder="Mục phải"
+                          placeholder="Mục phải (đáp án đúng)"
                           className="flex-1"
                         />
                         {question.matchingPairs &&

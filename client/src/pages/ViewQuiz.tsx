@@ -371,34 +371,41 @@ export default function ViewQuiz(props: ViewQuizProps) {
                   <div className="space-y-4">
                     {question.matchingPairs && question.matchingPairs.length > 0 ? (
                       <div className="space-y-3">
-                        {question.matchingPairs.map((pair, pairIndex) => (
-                          <div key={pairIndex} className="flex items-center gap-3 p-3 border rounded-md">
-                            <span className="font-medium flex-1">{pair.left}</span>
-                            <span className="text-muted-foreground">→</span>
-                            <Select
-                              value={selectedAnswers[question.id]?.[`left-${pairIndex}`] || ""}
-                              onValueChange={(value) => {
-                                const current = selectedAnswers[question.id] || {};
-                                handleAnswerSelect(question.id, {
-                                  ...current,
-                                  [`left-${pairIndex}`]: value,
-                                });
-                              }}
-                              disabled={showResults}
-                            >
-                              <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Chọn đáp án..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {question.matchingPairs?.map((p, idx) => (
-                                  <SelectItem key={idx} value={p.right}>
-                                    {p.right}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        ))}
+                        {question.matchingPairs.map((pair, pairIndex) => {
+                          // Lấy tất cả các đáp án từ options (nếu có) hoặc từ matchingPairs
+                          const availableOptions = question.options && question.options.length > 0
+                            ? question.options
+                            : (question.matchingPairs?.map(p => p.right) || []);
+                          
+                          return (
+                            <div key={pairIndex} className="flex items-center gap-3 p-3 border rounded-md">
+                              <span className="font-medium flex-1">{pair.left}</span>
+                              <span className="text-muted-foreground">→</span>
+                              <Select
+                                value={selectedAnswers[question.id]?.[`left-${pairIndex}`] || ""}
+                                onValueChange={(value) => {
+                                  const current = selectedAnswers[question.id] || {};
+                                  handleAnswerSelect(question.id, {
+                                    ...current,
+                                    [`left-${pairIndex}`]: value,
+                                  });
+                                }}
+                                disabled={showResults}
+                              >
+                                <SelectTrigger className="flex-1">
+                                  <SelectValue placeholder="Chọn đáp án..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availableOptions.map((option, idx) => (
+                                    <SelectItem key={idx} value={option}>
+                                      {option}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-muted-foreground">
