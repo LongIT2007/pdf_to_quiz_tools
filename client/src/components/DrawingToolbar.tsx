@@ -50,7 +50,7 @@ export function DrawingToolbar({
         variant={drawingEnabled ? "default" : "outline"}
         size="sm"
         onClick={onToggleDrawing}
-        title={drawingEnabled ? "Tắt vẽ (Ctrl)" : "Bật vẽ"}
+        title={drawingEnabled ? "Tắt vẽ" : "Bật vẽ"}
       >
         <Pencil className="w-4 h-4 mr-1" />
         {drawingEnabled ? "Tắt vẽ" : "Bật vẽ"}
