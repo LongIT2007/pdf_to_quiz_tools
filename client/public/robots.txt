@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://pdf-to-quiz-tools-v2.vercel.app/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /quiz/editor/
+
+# Allow important pages
+Allow: /
+Allow: /quiz/
+Allow: /upload
+Allow: /quizzes
+
