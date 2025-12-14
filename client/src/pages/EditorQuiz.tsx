@@ -44,9 +44,7 @@ export default function EditorQuiz(props?: EditorQuizProps) {
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<QuestionEditor[]>([]);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
-  // State for image zoom and pan in editor
-  const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
-  const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
+
 
   useEffect(() => {
     if (quizId) {
@@ -521,42 +519,22 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                 <div className="space-y-2">
                   <Label>Hình ảnh (tùy chọn)</Label>
                   {question.imageUrl ? (
-                    <div className="relative">
-                      <ZoomableImage
-                        questionId={question.id}
+                  {question.imageUrl ? (
+                    <div className="relative inline-block">
+                      <img
                         src={question.imageUrl}
                         alt="Question"
-                        zoomLevel={imageZoomLevels[question.id] || 100}
-                        position={imagePositions[question.id] || { x: 0, y: 0 }}
-                        onZoomChange={(id, zoom) => {
-                          setImageZoomLevels(prev => ({ ...prev, [id]: zoom }));
-                        }}
-                        onPositionChange={(id, pos) => {
-                          setImagePositions(prev => ({ ...prev, [id]: pos }));
-                        }}
-                        onReset={(id) => {
-                          setImageZoomLevels(prev => ({ ...prev, [id]: 100 }));
-                          setImagePositions(prev => ({ ...prev, [id]: { x: 0, y: 0 } }));
-                        }}
+                        className="max-w-full max-h-64 rounded-md border"
                       />
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="absolute top-2 right-2 z-10"
-                        onClick={() => {
-                          updateQuestion(question.id, { imageUrl: undefined });
-                          // Clean up zoom/position state
-                          const newZoomLevels = { ...imageZoomLevels };
-                          const newPositions = { ...imagePositions };
-                          delete newZoomLevels[question.id];
-                          delete newPositions[question.id];
-                          setImageZoomLevels(newZoomLevels);
-                          setImagePositions(newPositions);
-                        }}
+                        className="absolute top-2 right-2"
+                        onClick={() => updateQuestion(question.id, { imageUrl: undefined })}
                       >
                         <X className="w-4 h-4" />
                       </Button>
-                    </div>
+                      </div >
                   ) : (
                     <div className="flex items-center gap-2">
                       <input
@@ -674,7 +652,7 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                   <div className="space-y-4">
                     <Label>Các chỗ trống</Label>
                     {question.gaps?.map((gap, gapIndex) => (
-                      <div key={gapIndex} className="flex items-center gap-2">
+                    <Label>Các cặp nối</Label>sName="flex items-center gap-2">
                         <Input
                           type="number"
                           value={gap.position}
