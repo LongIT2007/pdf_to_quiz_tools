@@ -79,7 +79,8 @@ export default function ViewQuiz(props: ViewQuizProps) {
   const quizContainerRef = useRef<HTMLDivElement>(null);
   
   // Image zoom state - store zoom level and position for images in HTML content
-  const htmlImageZoomDataRef = useRef<Map<HTMLImageElement, { zoom: number; x: number; y: number }>>(new Map());
+  // Use image src as key to persist across re-renders
+  const htmlImageZoomDataRef = useRef<Map<string, { zoom: number; x: number; y: number }>>(new Map());
 
   // Setup zoom and pan for images in HTML content
   const setupHTMLImageZoomPan = () => {
@@ -89,9 +90,35 @@ export default function ViewQuiz(props: ViewQuizProps) {
     images.forEach((img) => {
       const imageElement = img as HTMLImageElement;
       
-      // Skip if already wrapped or if it's the question.imageUrl image (handled by ZoomableImage)
+      // Skip if already wrapped
       if (imageElement.parentElement?.classList.contains('zoomable-image-wrapper') ||
           imageElement.closest('.zoomable-image-container')) {
+        // Restore zoom state if already wrapped
+        const imageSrc = imageElement.src;
+        const existingData = htmlImageZoomDataRef.current.get(imageSrc);
+        if (existingData && (existingData.zoom !== 100 || existingData.x !== 0 || existingData.y !== 0)) {
+          const container = imageElement.closest('.zoomable-image-container') as HTMLElement;
+          const transformDiv = container?.querySelector('.zoomable-image-transform') as HTMLElement;
+          const zoomLabel = container?.querySelector('.zoomable-image-controls span') as HTMLElement;
+          const zoomOutBtn = container?.querySelector('.zoomable-image-controls button:first-child') as HTMLButtonElement;
+          const zoomInBtn = container?.querySelector('.zoomable-image-controls button:nth-child(3)') as HTMLButtonElement;
+          
+          if (transformDiv) {
+            transformDiv.style.transform = `scale(${existingData.zoom / 100}) translate(${existingData.x / (existingData.zoom / 100)}px, ${existingData.y / (existingData.zoom / 100)}px)`;
+            if (zoomLabel) {
+              zoomLabel.textContent = `${Math.round(existingData.zoom)}%`;
+            }
+            if (container) {
+              container.style.cursor = existingData.zoom > 100 ? 'grab' : 'default';
+            }
+            if (zoomOutBtn) {
+              zoomOutBtn.disabled = existingData.zoom <= 50;
+            }
+            if (zoomInBtn) {
+              zoomInBtn.disabled = existingData.zoom >= 300;
+            }
+          }
+        }
         return;
       }
 
@@ -100,11 +127,13 @@ export default function ViewQuiz(props: ViewQuizProps) {
         return;
       }
 
-      // Initialize zoom data if not exists
-      const imageId = `${imageElement.src}-${imageElement.offsetTop}`;
-      if (!htmlImageZoomDataRef.current.has(imageElement)) {
-        htmlImageZoomDataRef.current.set(imageElement, { zoom: 100, x: 0, y: 0 });
+      // Use image src as stable identifier
+      const imageSrc = imageElement.src;
+      // Initialize zoom data if not exists, or restore existing
+      if (!htmlImageZoomDataRef.current.has(imageSrc)) {
+        htmlImageZoomDataRef.current.set(imageSrc, { zoom: 100, x: 0, y: 0 });
       }
+      const data = htmlImageZoomDataRef.current.get(imageSrc)!;
 
       // Create wrapper
       const wrapper = document.createElement('div');
@@ -186,16 +215,23 @@ export default function ViewQuiz(props: ViewQuizProps) {
       // State
       let isDragging = false;
       let dragStart = { x: 0, y: 0 };
-      const data = htmlImageZoomDataRef.current.get(imageElement)!;
+      // data is already defined above using imageSrc as key
 
       // Update transform
       const updateTransform = () => {
+        // Update ref data to persist zoom state
+        htmlImageZoomDataRef.current.set(imageSrc, { ...data });
         transformDiv.style.transform = `scale(${data.zoom / 100}) translate(${data.x / (data.zoom / 100)}px, ${data.y / (data.zoom / 100)}px)`;
         zoomLabel.textContent = `${Math.round(data.zoom)}%`;
         container.style.cursor = data.zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default';
         zoomOutBtn.disabled = data.zoom <= 50;
         zoomInBtn.disabled = data.zoom >= 300;
       };
+      
+      // Restore zoom state if exists
+      if (data.zoom !== 100 || data.x !== 0 || data.y !== 0) {
+        updateTransform();
+      }
 
       // Wheel handler
       const handleWheel = (e: WheelEvent) => {
@@ -287,6 +323,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
   }, [quizId]);
 
   // Setup zoom/pan for HTML images after quiz loads or updates
+  // Don't re-run on selectedAnswers change to preserve zoom state
   useEffect(() => {
     if (quiz && quizContainerRef.current) {
       setTimeout(() => {
@@ -294,6 +331,16 @@ export default function ViewQuiz(props: ViewQuizProps) {
       }, 100);
     }
   }, [quiz, showResults]);
+  
+  // Also setup when content changes but preserve zoom state
+  useEffect(() => {
+    if (quiz && quizContainerRef.current) {
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        setupHTMLImageZoomPan();
+      });
+    }
+  }, [selectedAnswers]);
 
   const loadQuiz = async () => {
     try {
