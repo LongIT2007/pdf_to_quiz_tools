@@ -650,7 +650,7 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                   <div className="space-y-4">
                     <Label>Các chỗ trống</Label>
                     {question.gaps?.map((gap, gapIndex) => (
-                    <Label>Các cặp nối</Label>sName="flex items-center gap-2">
+                      <div key={gapIndex} className="flex items-center gap-2">
                         <Input
                           type="number"
                           value={gap.position}
