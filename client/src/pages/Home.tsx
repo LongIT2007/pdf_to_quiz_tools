@@ -226,6 +226,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="PDF to Quiz Tools - Chuyển PDF thành Bài Kiểm Tra Trắc Nghiệm | 15 Công Cụ Tốt Nhất"
+        description="Khám phá 15 công cụ và nền tảng hàng đầu giúp bạn chuyển đổi tệp PDF thành bài kiểm tra trắc nghiệm tương tác chỉ trong vài giây. So sánh tính năng, giá cả và đánh giá chi tiết."
+        keywords="PDF to quiz, chuyển PDF thành quiz, tạo bài kiểm tra từ PDF, AI quiz generator, PDF to test, trắc nghiệm từ PDF, quiz maker, đề thi từ PDF, công cụ chuyển PDF thành quiz, so sánh công cụ PDF to quiz"
+        url={typeof window !== "undefined" ? window.location.href : ""}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "PDF to Quiz Tools",
+          "description": "Tìm và so sánh các công cụ chuyển đổi PDF thành bài kiểm tra trắc nghiệm",
+          "url": "https://pdf-to-quiz-tools-v2.vercel.app/",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://pdf-to-quiz-tools-v2.vercel.app/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 

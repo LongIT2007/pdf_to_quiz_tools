@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, FileText, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { pdfAPI } from "@/lib/api";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 export default function UploadPDF() {
   const [, setLocation] = useLocation();

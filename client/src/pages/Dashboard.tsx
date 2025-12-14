@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { pdfAPI, quizAPI, PDFDocument, Quiz } from "@/lib/api";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -168,6 +169,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 ">
+      <SEO
+        title="Dashboard - Quản lý PDFs và Quizzes | PDF to Quiz Tools"
+        description="Quản lý tất cả PDFs và Quizzes của bạn. Upload PDF, tạo quiz từ PDF, và quản lý bài kiểm tra của bạn."
+        keywords="dashboard, quản lý quiz, quản lý PDF, PDF to quiz dashboard"
+        url={typeof window !== "undefined" ? window.location.href : ""}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "PDF to Quiz Tools Dashboard",
+          "description": "Quản lý PDFs và Quizzes",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web",
+        }}
+      />
       <div className="container max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Dashboard</h1>

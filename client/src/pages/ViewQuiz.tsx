@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import { DrawingToolbar } from "@/components/DrawingToolbar";
 import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { ZoomableImage } from "@/components/ZoomableImage";
+import { SEO } from "@/components/SEO";
 
 // Helper to ensure image URLs in HTML are absolute
 function ensureAbsoluteImageUrls(html: string): string {
@@ -259,6 +260,25 @@ export default function ViewQuiz(props: ViewQuizProps) {
         />
       )}
       
+      {quiz && (
+        <SEO
+          title={`${quiz.title} - PDF to Quiz Tools`}
+          description={quiz.description || `Làm bài kiểm tra: ${quiz.title} với ${quiz.questions.length} câu hỏi. ${quiz.metadata?.difficulty ? `Độ khó: ${quiz.metadata.difficulty}` : ''}`}
+          keywords={`quiz, bài kiểm tra, ${quiz.title}, trắc nghiệm, đề thi, PDF to quiz`}
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          type="article"
+          structuredData={{
+            "@context": "https://schema.org",
+            "@type": "Quiz",
+            "name": quiz.title,
+            "description": quiz.description || quiz.title,
+            "questionCount": quiz.questions.length,
+            "educationalLevel": quiz.metadata?.difficulty || "Intermediate",
+            "inLanguage": quiz.metadata?.language || "vi",
+          }}
+        />
+      )}
+      
       <div className="container max-w-4xl mx-auto relative" ref={quizContainerRef}>
         {/* Drawing Canvas Overlay - inside container to scroll with content */}
         {!showResults && drawingEnabled && (
@@ -450,7 +470,9 @@ export default function ViewQuiz(props: ViewQuizProps) {
                           Đáp án đúng:{" "}
                         </span>
                         <span className="font-semibold">
-                          {question.correctAnswer}
+                          {typeof question.correctAnswer === 'string' || typeof question.correctAnswer === 'number' 
+                            ? question.correctAnswer 
+                            : JSON.stringify(question.correctAnswer)}
                         </span>
                       </div>
                     )}
@@ -635,7 +657,9 @@ export default function ViewQuiz(props: ViewQuizProps) {
                           Đáp án mẫu:{" "}
                         </span>
                         <span className="font-semibold">
-                          {question.correctAnswer}
+                          {typeof question.correctAnswer === 'string' || typeof question.correctAnswer === 'number' 
+                            ? question.correctAnswer 
+                            : JSON.stringify(question.correctAnswer)}
                         </span>
                       </div>
                     )}

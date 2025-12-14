@@ -13,6 +13,7 @@ import { Loader2, ArrowLeft, Plus, Trash2, Image as ImageIcon, Save, X, FileQues
 import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { QuestionEditor } from "@/components/QuestionEditor";
+import { SEO } from "@/components/SEO";
 
 interface QuestionEditor {
   id: string;
@@ -392,6 +393,12 @@ export default function EditorQuiz(props?: EditorQuizProps) {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
+      <SEO
+        title={quizId ? `Chỉnh sửa Quiz - PDF to Quiz Tools` : `Tạo Quiz Mới - PDF to Quiz Tools`}
+        description={quizId ? "Chỉnh sửa quiz của bạn. Thêm, sửa, xóa câu hỏi, thay đổi đáp án và cấu hình quiz." : "Tạo quiz mới từ PDF. Thêm câu hỏi trắc nghiệm, điền vào chỗ trống, nối cặp và nhiều loại câu hỏi khác."}
+        keywords="tạo quiz, chỉnh sửa quiz, quiz editor, PDF to quiz editor"
+        url={typeof window !== "undefined" ? window.location.href : ""}
+      />
       <div className="container max-w-4xl mx-auto">
         <Button
           variant="ghost"
