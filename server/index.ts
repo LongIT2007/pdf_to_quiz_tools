@@ -45,10 +45,25 @@ async function startServer() {
 
   app.use(express.static(staticPath));
 
+  // Handle sitemap.xml and robots.txt explicitly with correct content type
+  app.get("/sitemap.xml", (req, res) => {
+    res.setHeader("Content-Type", "application/xml");
+    res.sendFile(path.join(staticPath, "sitemap.xml"));
+  });
+
+  app.get("/robots.txt", (req, res) => {
+    res.setHeader("Content-Type", "text/plain");
+    res.sendFile(path.join(staticPath, "robots.txt"));
+  });
+
   // Handle client-side routing - serve index.html for all non-API routes
   app.get("*", (req, res, next) => {
     // Skip API routes
     if (req.path.startsWith("/api")) {
+      return next();
+    }
+    // Skip static files that should be served directly
+    if (req.path === "/sitemap.xml" || req.path === "/robots.txt") {
       return next();
     }
     res.sendFile(path.join(staticPath, "index.html"));
