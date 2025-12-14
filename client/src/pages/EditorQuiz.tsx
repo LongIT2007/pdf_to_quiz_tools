@@ -14,6 +14,7 @@ import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { QuestionEditor } from "@/components/QuestionEditor";
 import { SEO } from "@/components/SEO";
+import { ZoomableImage } from "@/components/ZoomableImage";
 
 interface QuestionEditor {
   id: string;
@@ -43,6 +44,9 @@ export default function EditorQuiz(props?: EditorQuizProps) {
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<QuestionEditor[]>([]);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  // State for image zoom and pan in editor
+  const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
+  const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
 
   useEffect(() => {
     if (quizId) {
@@ -517,17 +521,38 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                 <div className="space-y-2">
                   <Label>Hình ảnh (tùy chọn)</Label>
                   {question.imageUrl ? (
-                    <div className="relative inline-block">
-                      <img
+                    <div className="relative">
+                      <ZoomableImage
+                        questionId={question.id}
                         src={question.imageUrl}
                         alt="Question"
-                        className="max-w-full max-h-64 rounded-md border"
+                        zoomLevel={imageZoomLevels[question.id] || 100}
+                        position={imagePositions[question.id] || { x: 0, y: 0 }}
+                        onZoomChange={(id, zoom) => {
+                          setImageZoomLevels(prev => ({ ...prev, [id]: zoom }));
+                        }}
+                        onPositionChange={(id, pos) => {
+                          setImagePositions(prev => ({ ...prev, [id]: pos }));
+                        }}
+                        onReset={(id) => {
+                          setImageZoomLevels(prev => ({ ...prev, [id]: 100 }));
+                          setImagePositions(prev => ({ ...prev, [id]: { x: 0, y: 0 } }));
+                        }}
                       />
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={() => updateQuestion(question.id, { imageUrl: undefined })}
+                        className="absolute top-2 right-2 z-10"
+                        onClick={() => {
+                          updateQuestion(question.id, { imageUrl: undefined });
+                          // Clean up zoom/position state
+                          const newZoomLevels = { ...imageZoomLevels };
+                          const newPositions = { ...imagePositions };
+                          delete newZoomLevels[question.id];
+                          delete newPositions[question.id];
+                          setImageZoomLevels(newZoomLevels);
+                          setImagePositions(newPositions);
+                        }}
                       >
                         <X className="w-4 h-4" />
                       </Button>
