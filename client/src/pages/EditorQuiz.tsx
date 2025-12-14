@@ -14,7 +14,6 @@ import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { QuestionEditor } from "@/components/QuestionEditor";
 import { SEO } from "@/components/SEO";
-import { ZoomableImage } from "@/components/ZoomableImage";
 
 interface QuestionEditor {
   id: string;
