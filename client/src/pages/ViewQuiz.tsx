@@ -82,13 +82,221 @@ export default function ViewQuiz(props: ViewQuizProps) {
   // Image zoom state - store zoom level and position for each question image
   const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
   const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
-  
+  const htmlImageZoomDataRef = useRef<Map<HTMLImageElement, { zoom: number; x: number; y: number }>>(new Map());
+
+  // Setup zoom and pan for images in HTML content
+  const setupHTMLImageZoomPan = () => {
+    if (!quizContainerRef.current) return;
+
+    const images = quizContainerRef.current.querySelectorAll('img:not(.zoomable-image-wrapper img)');
+    images.forEach((img) => {
+      const imageElement = img as HTMLImageElement;
+      
+      // Skip if already wrapped or if it's the question.imageUrl image (handled by ZoomableImage)
+      if (imageElement.parentElement?.classList.contains('zoomable-image-wrapper') ||
+          imageElement.closest('.zoomable-image-container')) {
+        return;
+      }
+
+      // Skip if it's inside a ZoomableImage component
+      if (imageElement.closest('[class*="zoomable"]')) {
+        return;
+      }
+
+      // Initialize zoom data if not exists
+      const imageId = `${imageElement.src}-${imageElement.offsetTop}`;
+      if (!htmlImageZoomDataRef.current.has(imageElement)) {
+        htmlImageZoomDataRef.current.set(imageElement, { zoom: 100, x: 0, y: 0 });
+      }
+
+      // Create wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'zoomable-image-wrapper relative inline-block my-2';
+      wrapper.style.cssText = 'max-width: 100%; position: relative; display: inline-block;';
+
+      // Create container for image
+      const container = document.createElement('div');
+      container.className = 'zoomable-image-container relative overflow-hidden rounded-md border bg-gray-50';
+      container.style.cssText = `
+        min-height: 100px;
+        max-height: 600px;
+        cursor: default;
+        position: relative;
+      `;
+
+      // Wrap image
+      imageElement.parentNode?.insertBefore(wrapper, imageElement);
+      wrapper.appendChild(container);
+      container.appendChild(imageElement);
+
+      // Update image styles
+      imageElement.style.cssText = `
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        display: block;
+        user-select: none;
+        pointer-events: none;
+      `;
+
+      // Create image transform div
+      const transformDiv = document.createElement('div');
+      transformDiv.className = 'zoomable-image-transform';
+      transformDiv.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: center;
+        transition: transform 0.1s ease-out;
+        min-height: 100px;
+      `;
+      container.insertBefore(transformDiv, imageElement);
+      transformDiv.appendChild(imageElement);
+
+      // Create controls
+      const controls = document.createElement('div');
+      controls.className = 'zoomable-image-controls absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg z-10';
+      controls.style.cssText = 'pointer-events: auto;';
+      container.appendChild(controls);
+
+      const zoomOutBtn = document.createElement('button');
+      zoomOutBtn.className = 'h-7 w-7 p-0 flex items-center justify-center hover:bg-gray-100 rounded disabled:opacity-50';
+      zoomOutBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>';
+      zoomOutBtn.title = 'Thu nhỏ';
+      controls.appendChild(zoomOutBtn);
+
+      const zoomLabel = document.createElement('span');
+      zoomLabel.className = 'text-xs font-medium min-w-[45px] text-center px-1';
+      zoomLabel.textContent = '100%';
+      controls.appendChild(zoomLabel);
+
+      const zoomInBtn = document.createElement('button');
+      zoomInBtn.className = 'h-7 w-7 p-0 flex items-center justify-center hover:bg-gray-100 rounded disabled:opacity-50';
+      zoomInBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" /></svg>';
+      zoomInBtn.title = 'Phóng to';
+      controls.appendChild(zoomInBtn);
+
+      const separator = document.createElement('div');
+      separator.className = 'h-4 w-px bg-gray-300 mx-1';
+      controls.appendChild(separator);
+
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'h-7 w-7 p-0 flex items-center justify-center hover:bg-gray-100 rounded';
+      resetBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+      resetBtn.title = 'Đặt lại';
+      controls.appendChild(resetBtn);
+
+      // State
+      let isDragging = false;
+      let dragStart = { x: 0, y: 0 };
+      const data = htmlImageZoomDataRef.current.get(imageElement)!;
+
+      // Update transform
+      const updateTransform = () => {
+        transformDiv.style.transform = `scale(${data.zoom / 100}) translate(${data.x / (data.zoom / 100)}px, ${data.y / (data.zoom / 100)}px)`;
+        zoomLabel.textContent = `${Math.round(data.zoom)}%`;
+        container.style.cursor = data.zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default';
+        zoomOutBtn.disabled = data.zoom <= 50;
+        zoomInBtn.disabled = data.zoom >= 300;
+      };
+
+      // Wheel handler
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const delta = e.deltaY > 0 ? -10 : 10;
+        data.zoom = Math.max(50, Math.min(300, data.zoom + delta));
+        if (data.zoom === 100) {
+          data.x = 0;
+          data.y = 0;
+        }
+        updateTransform();
+      };
+
+      // Mouse handlers
+      const handleMouseDown = (e: MouseEvent) => {
+        if (data.zoom > 100 && e.button === 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          isDragging = true;
+          dragStart = { x: e.clientX - data.x, y: e.clientY - data.y };
+          container.style.cursor = 'grabbing';
+        }
+      };
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (isDragging && data.zoom > 100) {
+          e.preventDefault();
+          e.stopPropagation();
+          data.x = e.clientX - dragStart.x;
+          data.y = e.clientY - dragStart.y;
+          updateTransform();
+        }
+      };
+
+      const handleMouseUp = () => {
+        isDragging = false;
+        if (data.zoom > 100) {
+          container.style.cursor = 'grab';
+        } else {
+          container.style.cursor = 'default';
+        }
+      };
+
+      // Button handlers
+      zoomOutBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        data.zoom = Math.max(50, data.zoom - 25);
+        if (data.zoom === 100) {
+          data.x = 0;
+          data.y = 0;
+        }
+        updateTransform();
+      };
+
+      zoomInBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        data.zoom = Math.min(300, data.zoom + 25);
+        updateTransform();
+      };
+
+      resetBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        data.zoom = 100;
+        data.x = 0;
+        data.y = 0;
+        updateTransform();
+      };
+
+      // Attach event listeners
+      container.addEventListener('wheel', handleWheel, { passive: false });
+      container.addEventListener('mousedown', handleMouseDown);
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseup', handleMouseUp);
+      container.addEventListener('mouseleave', handleMouseUp);
+
+      // Initial update
+      updateTransform();
+    });
+  };
 
   useEffect(() => {
     if (quizId) {
       loadQuiz();
     }
   }, [quizId]);
+
+  // Setup zoom/pan for HTML images after quiz loads or updates
+  useEffect(() => {
+    if (quiz && quizContainerRef.current) {
+      setTimeout(() => {
+        setupHTMLImageZoomPan();
+      }, 100);
+    }
+  }, [quiz, showResults]);
 
   const loadQuiz = async () => {
     try {
