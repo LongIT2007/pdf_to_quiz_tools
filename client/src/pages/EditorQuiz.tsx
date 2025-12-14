@@ -518,7 +518,6 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                 <div className="space-y-2">
                   <Label>Hình ảnh (tùy chọn)</Label>
                   {question.imageUrl ? (
-                  {question.imageUrl ? (
                     <div className="relative inline-block">
                       <img
                         src={question.imageUrl}
