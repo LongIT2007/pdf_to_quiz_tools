@@ -40,7 +40,6 @@ import { quizAPI, imageAPI, Quiz, QuizQuestion } from "@/lib/api";
 import { toast } from "sonner";
 import { DrawingToolbar } from "@/components/DrawingToolbar";
 import { DrawingCanvas } from "@/components/DrawingCanvas";
-import { ZoomableImage } from "@/components/ZoomableImage";
 import { SEO } from "@/components/SEO";
 
 // Helper to ensure image URLs in HTML are absolute
@@ -79,9 +78,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
   const [clearTrigger, setClearTrigger] = useState(0);
   const quizContainerRef = useRef<HTMLDivElement>(null);
   
-  // Image zoom state - store zoom level and position for each question image
-  const [imageZoomLevels, setImageZoomLevels] = useState<Record<string, number>>({});
-  const [imagePositions, setImagePositions] = useState<Record<string, { x: number; y: number }>>({});
+  // Image zoom state - store zoom level and position for images in HTML content
   const htmlImageZoomDataRef = useRef<Map<HTMLImageElement, { zoom: number; x: number; y: number }>>(new Map());
 
   // Setup zoom and pan for images in HTML content
@@ -603,23 +600,13 @@ export default function ViewQuiz(props: ViewQuizProps) {
               <CardContent className="space-y-4">
                 {/* Display image if available */}
                 {question.imageUrl && (
-                  <ZoomableImage
-                    src={question.imageUrl}
-                    alt="Question"
-                    questionId={question.id}
-                    zoomLevel={imageZoomLevels[question.id] || 100}
-                    position={imagePositions[question.id] || { x: 0, y: 0 }}
-                    onZoomChange={(id, zoom) => {
-                      setImageZoomLevels(prev => ({ ...prev, [id]: zoom }));
-                    }}
-                    onPositionChange={(id, pos) => {
-                      setImagePositions(prev => ({ ...prev, [id]: pos }));
-                    }}
-                    onReset={(id) => {
-                      setImageZoomLevels(prev => ({ ...prev, [id]: 100 }));
-                      setImagePositions(prev => ({ ...prev, [id]: { x: 0, y: 0 } }));
-                    }}
-                  />
+                  <div className="mb-4">
+                    <img
+                      src={question.imageUrl}
+                      alt="Question"
+                      className="max-w-full max-h-96 object-contain rounded-md border"
+                    />
+                  </div>
                 )}
                 {question.type === "multiple-choice" && question.options && (
                   <div className="space-y-2">
