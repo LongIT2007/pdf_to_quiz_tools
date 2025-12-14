@@ -102,8 +102,14 @@ export default function ViewQuiz(props: ViewQuizProps) {
           const zoomLabel = container?.querySelector('.zoomable-image-controls span') as HTMLElement;
           const zoomOutBtn = container?.querySelector('.zoomable-image-controls button:first-child') as HTMLButtonElement;
           const zoomInBtn = container?.querySelector('.zoomable-image-controls button:nth-child(3)') as HTMLButtonElement;
+          const controls = container?.querySelector('.zoomable-image-controls') as HTMLElement;
           
           if (transformDiv) {
+            // Ensure controls are hidden by default and show on hover
+            if (controls) {
+              controls.style.opacity = '0';
+              controls.style.transition = 'opacity 0.2s ease-in-out';
+            }
             transformDiv.style.transform = `scale(${existingData.zoom / 100}) translate(${existingData.x / (existingData.zoom / 100)}px, ${existingData.y / (existingData.zoom / 100)}px)`;
             if (zoomLabel) {
               zoomLabel.textContent = `${Math.round(existingData.zoom)}%`;
@@ -182,8 +188,17 @@ export default function ViewQuiz(props: ViewQuizProps) {
       // Create controls
       const controls = document.createElement('div');
       controls.className = 'zoomable-image-controls absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg z-10';
-      controls.style.cssText = 'pointer-events: auto;';
+      controls.style.cssText = 'pointer-events: auto; opacity: 0; transition: opacity 0.2s ease-in-out;';
       container.appendChild(controls);
+      
+      // Show controls on hover
+      container.addEventListener('mouseenter', () => {
+        controls.style.opacity = '1';
+      });
+      
+      container.addEventListener('mouseleave', () => {
+        controls.style.opacity = '0';
+      });
 
       const zoomOutBtn = document.createElement('button');
       zoomOutBtn.className = 'h-7 w-7 p-0 flex items-center justify-center hover:bg-gray-100 rounded disabled:opacity-50';
