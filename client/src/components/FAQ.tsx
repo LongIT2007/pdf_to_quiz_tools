@@ -44,14 +44,14 @@ const faqData = [
 
 export function FAQ() {
   return (
-    <section className="py-12 px-4 bg-muted/50">
+    <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 bg-muted/50">
       <div className="container max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <HelpCircle className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold">Câu Hỏi Thường Gặp</h2>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+            <HelpCircle className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <h2 className="text-2xl sm:text-3xl font-bold">Câu Hỏi Thường Gặp</h2>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground px-2">
             Tìm câu trả lời cho các câu hỏi phổ biến về PDF to Quiz Tools
           </p>
         </div>
@@ -59,10 +59,10 @@ export function FAQ() {
         <Accordion type="single" collapsible className="w-full">
           {faqData.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left font-semibold">
+              <AccordionTrigger className="text-left font-semibold text-sm sm:text-base px-2 sm:px-4">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent className="text-sm sm:text-base text-muted-foreground px-2 sm:px-4 pb-3 sm:pb-4">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

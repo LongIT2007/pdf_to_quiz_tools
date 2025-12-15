@@ -177,24 +177,26 @@ export default function SmartUpload() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-6 sm:py-8 md:py-12 px-4 sm:px-6">
       <div className="container max-w-4xl mx-auto">
-        <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Brain className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold">Smart PDF Upload</h1>
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Smart PDF Upload</h1>
           </div>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-base sm:text-lg text-muted-foreground mb-3 sm:mb-4 px-2">
             AI tự động nhận diện câu hỏi và đáp án từ PDF
           </p>
-          <div className="flex gap-2 justify-center mt-4">
-            <Badge variant="outline">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3 sm:mt-4 px-2">
+            <Badge variant="outline" className="text-xs sm:text-sm">
               <FileText className="w-3 h-3 mr-1" />
-              1 file: Tự động tách đề và đáp án
+              <span className="hidden sm:inline">1 file: Tự động tách đề và đáp án</span>
+              <span className="sm:hidden">1 file: Tự động tách</span>
             </Badge>
-            <Badge variant="outline">
+            <Badge variant="outline" className="text-xs sm:text-sm">
               <FileStack className="w-3 h-3 mr-1" />
-              Nhiều file: Tự động ghép đề và đáp án
+              <span className="hidden sm:inline">Nhiều file: Tự động ghép đề và đáp án</span>
+              <span className="sm:hidden">Nhiều file: Tự động ghép</span>
             </Badge>
           </div>
         </div>
@@ -215,20 +217,22 @@ export default function SmartUpload() {
             )}
 
             <Tabs value={uploadMode} onValueChange={(v) => setUploadMode(v as "single" | "multiple")}>
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="single">
-                  <FileText className="w-4 h-4 mr-2" />
-                  1 File (Đề + Đáp Án)
+              <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+                <TabsTrigger value="single" className="text-xs sm:text-sm">
+                  <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">1 File (Đề + Đáp Án)</span>
+                  <span className="sm:hidden">1 File</span>
                 </TabsTrigger>
-                <TabsTrigger value="multiple">
-                  <FileStack className="w-4 h-4 mr-2" />
-                  Nhiều Files (Tách Biệt)
+                <TabsTrigger value="multiple" className="text-xs sm:text-sm">
+                  <FileStack className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Nhiều Files (Tách Biệt)</span>
+                  <span className="sm:hidden">Nhiều Files</span>
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="single">
                 <div
-                  className="border-2 border-dashed rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
+                  className="border-2 border-dashed rounded-lg p-6 sm:p-8 md:p-12 text-center hover:border-primary transition-colors cursor-pointer"
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, "single")}
                   onClick={() => singleFileInputRef.current?.click()}
@@ -243,35 +247,37 @@ export default function SmartUpload() {
                   />
 
                   {isUploading && uploadedPDFs.length === 0 ? (
-                    <div className="space-y-4">
-                      <Loader2 className="w-16 h-16 mx-auto animate-spin text-primary" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto animate-spin text-primary" />
                       <div>
-                        <p className="text-lg font-medium mb-2">Đang upload...</p>
+                        <p className="text-base sm:text-lg font-medium mb-2">Đang upload...</p>
                         <Progress value={uploadProgress} className="w-full max-w-md mx-auto" />
-                        <p className="text-sm text-muted-foreground mt-2">{uploadProgress}%</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-2">{uploadProgress}%</p>
                       </div>
                     </div>
                   ) : uploadedPDFs.length > 0 ? (
-                    <div className="space-y-4">
-                      <CheckCircle2 className="w-16 h-16 mx-auto text-green-600" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <CheckCircle2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-600" />
                       <div>
-                        <p className="text-lg font-medium mb-2">Upload thành công!</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-base sm:text-lg font-medium mb-2">Upload thành công!</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           Đang phân tích PDF với AI...
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <Upload className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground" />
                       <div>
-                        <p className="text-lg font-medium mb-2">
+                        <p className="text-base sm:text-lg font-medium mb-2">
                           Kéo thả 1 file PDF vào đây
                         </p>
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                           File có thể chứa cả đề và đáp án
                         </p>
-                        <Button type="button">Chọn File</Button>
+                        <Button type="button" size="lg" className="w-full sm:w-auto">
+                          Chọn File
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         AI sẽ tự động tách đề và đáp án
@@ -283,7 +289,7 @@ export default function SmartUpload() {
 
               <TabsContent value="multiple">
                 <div
-                  className="border-2 border-dashed rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
+                  className="border-2 border-dashed rounded-lg p-6 sm:p-8 md:p-12 text-center hover:border-primary transition-colors cursor-pointer"
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, "multiple")}
                   onClick={() => multipleFileInputRef.current?.click()}
@@ -299,18 +305,18 @@ export default function SmartUpload() {
                   />
 
                   {isUploading ? (
-                    <div className="space-y-4">
-                      <Loader2 className="w-16 h-16 mx-auto animate-spin text-primary" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto animate-spin text-primary" />
                       <div>
-                        <p className="text-lg font-medium mb-2">
+                        <p className="text-base sm:text-lg font-medium mb-2">
                           Đang upload {uploadedPDFs.length > 0 ? `${uploadedPDFs.length} file` : "files"}...
                         </p>
                         <Progress value={uploadProgress} className="w-full max-w-md mx-auto" />
-                        <p className="text-sm text-muted-foreground mt-2">{uploadProgress.toFixed(0)}%</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-2">{uploadProgress.toFixed(0)}%</p>
                         {uploadedPDFs.length > 0 && (
-                          <div className="mt-4 space-y-2">
+                          <div className="mt-3 sm:mt-4 space-y-2 flex flex-wrap justify-center gap-2">
                             {uploadedPDFs.map((pdf) => (
-                              <Badge key={pdf.id} variant="secondary" className="mr-2">
+                              <Badge key={pdf.id} variant="secondary" className="text-xs break-all max-w-full">
                                 {pdf.originalName}
                               </Badge>
                             ))}
@@ -319,35 +325,37 @@ export default function SmartUpload() {
                       </div>
                     </div>
                   ) : uploadedPDFs.length > 0 ? (
-                    <div className="space-y-4">
-                      <CheckCircle2 className="w-16 h-16 mx-auto text-green-600" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <CheckCircle2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-600" />
                       <div>
-                        <p className="text-lg font-medium mb-2">
+                        <p className="text-base sm:text-lg font-medium mb-2">
                           Upload thành công {uploadedPDFs.length} file!
                         </p>
-                        <div className="space-y-2 mt-4">
+                        <div className="space-y-2 mt-3 sm:mt-4 flex flex-wrap justify-center gap-2">
                           {uploadedPDFs.map((pdf) => (
-                            <Badge key={pdf.id} variant="secondary" className="mr-2">
+                            <Badge key={pdf.id} variant="secondary" className="text-xs break-all max-w-full">
                               {pdf.originalName}
                             </Badge>
                           ))}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-4">
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
                           Đang phân tích với AI...
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <FileStack className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <FileStack className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground" />
                       <div>
-                        <p className="text-lg font-medium mb-2">
+                        <p className="text-base sm:text-lg font-medium mb-2">
                           Kéo thả nhiều file PDF vào đây
                         </p>
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                           Có thể là: 1 file đề + nhiều file đáp án
                         </p>
-                        <Button type="button">Chọn Nhiều Files</Button>
+                        <Button type="button" size="lg" className="w-full sm:w-auto">
+                          Chọn Nhiều Files
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         AI sẽ tự động nhận diện và ghép đề với đáp án
@@ -360,11 +368,11 @@ export default function SmartUpload() {
           </CardContent>
         </Card>
 
-        <Alert className="mt-6">
+        <Alert className="mt-4 sm:mt-6">
           <Brain className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-sm sm:text-base">
             <strong>Chế độ thông minh:</strong> AI sẽ tự động phân tích PDF và:
-            <ul className="list-disc list-inside mt-2 space-y-1">
+            <ul className="list-disc list-inside mt-2 space-y-1 text-xs sm:text-sm">
               <li>Nhận diện câu hỏi trong file</li>
               <li>Nhận diện đáp án (có thể trong cùng file hoặc file khác)</li>
               <li>Ghép câu hỏi với đáp án đúng</li>
@@ -373,8 +381,8 @@ export default function SmartUpload() {
           </AlertDescription>
         </Alert>
 
-        <div className="mt-8 text-center">
-          <Button variant="outline" onClick={() => setLocation("/")}>
+        <div className="mt-6 sm:mt-8 text-center">
+          <Button variant="outline" onClick={() => setLocation("/")} className="w-full sm:w-auto">
             Quay lại Dashboard
           </Button>
         </div>

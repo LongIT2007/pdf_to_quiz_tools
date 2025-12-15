@@ -277,7 +277,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 ">
+    <div className="min-h-screen bg-background py-6 sm:py-8 md:py-12 px-4 sm:px-6">
       <SEO
         title="PDF to Quiz Tools - Chuyển PDF thành Bài Kiểm Tra Trắc Nghiệm"
         description="Công cụ AI chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác. Tạo quiz từ PDF, Word, PowerPoint với nhiều loại câu hỏi khác nhau. Miễn phí và dễ sử dụng."
@@ -287,19 +287,19 @@ export default function Dashboard() {
       />
       <div className="container max-w-6xl mx-auto">
         {/* Hero Section với H1 cho SEO */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+        <div className="mb-8 sm:mb-10 md:mb-12 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent px-2">
             PDF to Quiz Tools
           </h1>
-          <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 sm:mb-6 max-w-2xl mx-auto px-2">
             Chuyển đổi PDF thành bài kiểm tra trắc nghiệm với AI. Tạo quiz từ PDF, Word, PowerPoint một cách nhanh chóng và dễ dàng.
           </p>
         </div>
 
         {/* Features Section với H2 */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-center">Tính Năng Nổi Bật</h2>
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <section className="mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center px-2">Tính Năng Nổi Bật</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -337,54 +337,69 @@ export default function Dashboard() {
         </section>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Bắt Đầu Ngay</h2>
-          <div className="mb-6 flex gap-4 flex-wrap">
-          <Button onClick={() => setLocation("/upload")} size="lg">
-            <Upload className="w-4 h-4 mr-2" />
-            Upload PDF
-          </Button>
-          <Button
-            onClick={() => setLocation("/upload/smart")}
-            size="lg"
-            variant="outline"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Smart Upload (AI)
-          </Button>
-          <Button
-            onClick={() => setLocation("/quiz/editor")}
-            size="lg"
-            variant="default"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            Soạn Quiz Thủ Công
-          </Button>
-          {quizzes.length > 0 && (
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 px-2">Bắt Đầu Ngay</h2>
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 flex-wrap px-2">
             <Button 
-              onClick={() => {
-                const randomQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
-                setLocation(`/quiz/${randomQuiz.id}`);
-              }} 
-              size="lg" 
-              variant="secondary"
+              onClick={() => setLocation("/upload")} 
+              size="lg"
+              className="w-full sm:w-auto flex-1 sm:flex-none"
             >
-              <Shuffle className="w-4 h-4 mr-2" />
-              Quiz Ngẫu Nhiên
+              <Upload className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Upload PDF</span>
+              <span className="sm:hidden">Upload</span>
             </Button>
-          )}
+            <Button
+              onClick={() => setLocation("/upload/smart")}
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto flex-1 sm:flex-none"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Smart Upload (AI)</span>
+              <span className="sm:hidden">Smart Upload</span>
+            </Button>
+            <Button
+              onClick={() => setLocation("/quiz/editor")}
+              size="lg"
+              variant="default"
+              className="w-full sm:w-auto flex-1 sm:flex-none"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              <span className="hidden md:inline">Soạn Quiz Thủ Công</span>
+              <span className="md:hidden">Soạn Quiz</span>
+            </Button>
+            {quizzes.length > 0 && (
+              <Button 
+                onClick={() => {
+                  const randomQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+                  setLocation(`/quiz/${randomQuiz.id}`);
+                }} 
+                size="lg" 
+                variant="secondary"
+                className="w-full sm:w-auto flex-1 sm:flex-none"
+              >
+                <Shuffle className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Quiz Ngẫu Nhiên</span>
+                <span className="sm:hidden">Random</span>
+              </Button>
+            )}
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="quizzes">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Quizzes ({quizzes.length})
+          <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:grid-cols-none">
+            <TabsTrigger value="quizzes" className="text-sm sm:text-base">
+              <BookOpen className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Quizzes</span>
+              <span className="sm:hidden">Quiz</span>
+              <span className="ml-1">({quizzes.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="pdfs">
-              <FileText className="w-4 h-4 mr-2" />
-              PDFs ({pdfs.length})
+            <TabsTrigger value="pdfs" className="text-sm sm:text-base">
+              <FileText className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">PDFs</span>
+              <span className="sm:hidden">PDF</span>
+              <span className="ml-1">({pdfs.length})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -408,16 +423,16 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {pdfs.map(pdf => (
                   <Card key={pdf.id}>
                     <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg mb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2 break-words">
                             {pdf.originalName}
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-xs sm:text-sm">
                             {(pdf.fileSize / 1024).toFixed(2)} KB
                             {pdf.pageCount && ` • ${pdf.pageCount} trang`}
                           </CardDescription>
@@ -433,18 +448,21 @@ export default function Dashboard() {
                             onClick={() =>
                               setLocation(`/quiz/create?pdfId=${pdf.id}`)
                             }
-                            className="flex-1"
+                            className="flex-1 text-xs sm:text-sm"
                           >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Tạo Quiz
+                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Tạo Quiz</span>
+                            <span className="sm:hidden">Tạo</span>
                           </Button>
                         )}
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeletePDF(pdf.id)}
+                          className="px-2 sm:px-3"
+                          aria-label="Xóa PDF"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                       </div>
                     </CardContent>
@@ -454,17 +472,17 @@ export default function Dashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="quizzes" className="mt-6">
+          <TabsContent value="quizzes" className="mt-4 sm:mt-6">
             {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin" />
+              <div className="flex justify-center py-8 sm:py-12">
+                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin" />
               </div>
             ) : quizzes.length === 0 ? (
               <Card>
-                <CardContent className="py-12 text-center">
-                  <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium mb-2">Chưa có Quiz nào</p>
-                  <p className="text-muted-foreground mb-4">
+                <CardContent className="py-8 sm:py-12 text-center">
+                  <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-3 sm:mb-4" />
+                  <p className="text-base sm:text-lg font-medium mb-2">Chưa có Quiz nào</p>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 px-2">
                     Tạo quiz từ PDF để bắt đầu
                   </p>
                   <Button onClick={() => setLocation("/upload")}>
@@ -474,7 +492,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {(() => {
                   // Group quizzes by group name
                   const grouped: Record<string, Quiz[]> = {};
@@ -489,32 +507,32 @@ export default function Dashboard() {
 
                   return Object.entries(grouped).map(
                     ([groupName, groupQuizzes]) => (
-                      <div key={groupName} className="space-y-4">
+                      <div key={groupName} className="space-y-3 sm:space-y-4">
                         {groupName !== "Khác" && (
-                          <div className="border-b pb-2">
-                            <h3 className="text-2xl font-semibold text-primary capitalize">
+                          <div className="border-b pb-2 px-2">
+                            <h3 className="text-xl sm:text-2xl font-semibold text-primary capitalize">
                               {groupName}
                             </h3>
                           </div>
                         )}
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                           {groupQuizzes.map(quiz => (
                             <Card key={quiz.id}>
                               <CardHeader>
-                                <CardTitle className="text-lg mb-2">
+                                <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2">
                                   {quiz.title}
                                 </CardTitle>
-                                <CardDescription>
+                                <CardDescription className="line-clamp-2 text-xs sm:text-sm">
                                   {quiz.description || "Không có mô tả"}
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="flex items-center justify-between mb-4">
-                                  <Badge variant="outline">
+                                <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
+                                  <Badge variant="outline" className="text-xs">
                                     {quiz.questions.length} câu hỏi
                                   </Badge>
                                   {quiz.metadata?.difficulty && (
-                                    <Badge>
+                                    <Badge className="text-xs">
                                       {quiz.metadata.difficulty === "easy"
                                         ? "Dễ"
                                         : quiz.metadata.difficulty === "medium"
@@ -529,9 +547,10 @@ export default function Dashboard() {
                                     onClick={() =>
                                       setLocation(`/quiz/${quiz.id}`)
                                     }
-                                    className="flex-1"
+                                    className="flex-1 text-xs sm:text-sm"
                                   >
-                                    Làm Quiz
+                                    <span className="hidden sm:inline">Làm Quiz</span>
+                                    <span className="sm:hidden">Làm</span>
                                   </Button>
                                   <Button
                                     size="sm"
@@ -539,15 +558,19 @@ export default function Dashboard() {
                                     onClick={() =>
                                       setLocation(`/quiz/editor/${quiz.id}`)
                                     }
+                                    className="px-2 sm:px-3"
+                                    aria-label="Chỉnh sửa"
                                   >
-                                    <Edit className="w-4 h-4" />
+                                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleDeleteQuiz(quiz.id)}
+                                    className="px-2 sm:px-3"
+                                    aria-label="Xóa"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                                   </Button>
                                 </div>
                               </CardContent>

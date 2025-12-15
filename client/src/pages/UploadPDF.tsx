@@ -164,7 +164,7 @@ export default function UploadPDF() {
 
             {!uploadedPDF && (
               <div
-                className="border-2 border-dashed rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
+                className="border-2 border-dashed rounded-lg p-6 sm:p-8 md:p-12 text-center hover:border-primary transition-colors cursor-pointer"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
@@ -179,25 +179,27 @@ export default function UploadPDF() {
                 />
 
                 {isUploading ? (
-                  <div className="space-y-4">
-                    <Loader2 className="w-16 h-16 mx-auto animate-spin text-primary" />
+                  <div className="space-y-3 sm:space-y-4">
+                    <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto animate-spin text-primary" />
                     <div>
-                      <p className="text-lg font-medium mb-2">Đang upload...</p>
+                      <p className="text-base sm:text-lg font-medium mb-2">Đang upload...</p>
                       <Progress value={uploadProgress} className="w-full max-w-md mx-auto" />
-                      <p className="text-sm text-muted-foreground mt-2">{uploadProgress}%</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2">{uploadProgress}%</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <Upload className="w-16 h-16 mx-auto text-muted-foreground" />
+                  <div className="space-y-3 sm:space-y-4">
+                    <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground" />
                     <div>
-                      <p className="text-lg font-medium mb-2">
+                      <p className="text-base sm:text-lg font-medium mb-2">
                         Kéo thả file PDF vào đây
                       </p>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                         hoặc click để chọn file
                       </p>
-                      <Button type="button">Chọn File</Button>
+                      <Button type="button" size="lg" className="w-full sm:w-auto">
+                        Chọn File
+                      </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Hỗ trợ: PDF • Tối đa 100MB
