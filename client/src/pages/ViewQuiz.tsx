@@ -149,9 +149,10 @@ export default function ViewQuiz(props: ViewQuizProps) {
       // Create container for image
       const container = document.createElement('div');
       container.className = 'zoomable-image-container relative overflow-hidden rounded-md border bg-gray-50';
+      const isMobile = window.innerWidth < 640;
       container.style.cssText = `
-        min-height: 100px;
-        max-height: 600px;
+        min-height: ${isMobile ? '200px' : '100px'};
+        max-height: ${isMobile ? '80vh' : '600px'};
         cursor: default;
         position: relative;
       `;
@@ -161,11 +162,12 @@ export default function ViewQuiz(props: ViewQuizProps) {
       wrapper.appendChild(container);
       container.appendChild(imageElement);
 
-      // Update image styles - display at full original size
+      // Update image styles - display at full original size, to hơn trên mobile
       imageElement.style.cssText = `
-        width: auto;
+        width: ${isMobile ? '100%' : 'auto'};
         height: auto;
         max-width: 100%;
+        max-height: ${isMobile ? '70vh' : 'none'};
         object-fit: contain;
         display: block;
         user-select: none;
@@ -650,7 +652,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {index + 1}
                   </span>
                   <div
-                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-auto [&_img]:block [&_img]:my-2"
+                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-full sm:[&_img]:w-auto [&_img]:max-h-[70vh] sm:[&_img]:max-h-96 [&_img]:block [&_img]:my-2 [&_img]:object-contain"
                     dangerouslySetInnerHTML={{
                       __html: ensureAbsoluteImageUrls(question.question),
                     }}
@@ -663,11 +665,12 @@ export default function ViewQuiz(props: ViewQuizProps) {
               <CardContent className="space-y-4">
                 {/* Display image if available */}
                 {question.imageUrl && (
-                  <div className="mb-4">
+                  <div className="mb-4 -mx-4 sm:mx-0">
                     <img
                       src={question.imageUrl}
                       alt="Question"
-                      className="max-w-full w-auto h-auto object-contain rounded-md border"
+                      className="w-full sm:w-auto max-w-full sm:max-w-2xl max-h-[70vh] sm:max-h-96 h-auto object-contain rounded-md border"
+                      loading="lazy"
                     />
                   </div>
                 )}

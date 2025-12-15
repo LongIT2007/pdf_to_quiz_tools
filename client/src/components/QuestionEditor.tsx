@@ -91,10 +91,14 @@ export function QuestionEditor({
         // Create image element
         const img = document.createElement("img");
         img.src = result.url;
+        const isMobile = window.innerWidth < 640;
         img.style.maxWidth = "100%";
+        img.style.width = isMobile ? "100%" : "auto";
         img.style.height = "auto";
+        img.style.maxHeight = isMobile ? "70vh" : "none";
         img.style.display = "block";
         img.style.margin = "10px 0";
+        img.style.objectFit = "contain";
         img.className = "question-image";
         
         // Insert image at cursor position or end
@@ -166,7 +170,7 @@ export function QuestionEditor({
           "min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
           "focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           "prose prose-sm max-w-none",
-          "[&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2",
+          "[&_img]:max-w-full [&_img]:w-full sm:[&_img]:w-auto [&_img]:max-h-[70vh] sm:[&_img]:max-h-none [&_img]:h-auto [&_img]:block [&_img]:my-2 [&_img]:object-contain",
           "[&_p]:m-0 [&_p]:mb-2 [&_br]:mb-2",
           isUploading && "opacity-50",
           className
