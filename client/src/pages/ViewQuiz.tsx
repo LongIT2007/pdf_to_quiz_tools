@@ -161,10 +161,11 @@ export default function ViewQuiz(props: ViewQuizProps) {
       wrapper.appendChild(container);
       container.appendChild(imageElement);
 
-      // Update image styles
+      // Update image styles - display at full original size
       imageElement.style.cssText = `
+        width: auto;
+        height: auto;
         max-width: 100%;
-        max-height: 400px;
         object-fit: contain;
         display: block;
         user-select: none;
@@ -649,7 +650,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {index + 1}
                   </span>
                   <div
-                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:my-2"
+                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-auto [&_img]:block [&_img]:my-2"
                     dangerouslySetInnerHTML={{
                       __html: ensureAbsoluteImageUrls(question.question),
                     }}
@@ -666,7 +667,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     <img
                       src={question.imageUrl}
                       alt="Question"
-                      className="max-w-full max-h-96 object-contain rounded-md border"
+                      className="max-w-full w-auto h-auto object-contain rounded-md border"
                     />
                   </div>
                 )}
