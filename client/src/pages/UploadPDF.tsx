@@ -90,13 +90,53 @@ export default function UploadPDF() {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
+      <SEO
+        title="Upload PDF - Tải Lên PDF và Tạo Quiz | PDF to Quiz Tools"
+        description="Tải lên file PDF và tạo bài kiểm tra trắc nghiệm tự động. Hỗ trợ file PDF lên đến 100MB. Tạo quiz từ PDF một cách nhanh chóng và dễ dàng."
+        keywords="upload PDF, tải lên PDF, tạo quiz từ PDF, PDF to quiz upload"
+        url={typeof window !== "undefined" ? window.location.href : ""}
+      />
       <div className="container max-w-4xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Upload PDF</h1>
-          <p className="text-muted-foreground text-lg">
-            Tải lên file PDF để bắt đầu tạo bài kiểm tra
+          <h1 className="text-4xl font-bold mb-4">Tải Lên PDF và Tạo Quiz</h1>
+          <p className="text-muted-foreground text-lg mb-4">
+            Tải lên file PDF để bắt đầu tạo bài kiểm tra trắc nghiệm tự động
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Hỗ trợ file PDF • Tối đa 100MB • Tạo quiz tự động với AI
           </p>
         </div>
+
+        {/* Hướng dẫn sử dụng */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Hướng Dẫn Sử Dụng</h2>
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Bước 1: Tải Lên PDF</CardTitle>
+                <CardDescription>
+                  Chọn file PDF từ máy tính của bạn hoặc kéo thả vào đây
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Bước 2: Chọn Loại Quiz</CardTitle>
+                <CardDescription>
+                  Chọn loại câu hỏi bạn muốn tạo (trắc nghiệm, tự luận, v.v.)
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Bước 3: Hoàn Thành</CardTitle>
+                <CardDescription>
+                  AI sẽ tự động tạo quiz cho bạn. Chỉ cần đợi vài giây!
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </section>
 
         <Card className="border-2 border-dashed">
           <CardHeader>

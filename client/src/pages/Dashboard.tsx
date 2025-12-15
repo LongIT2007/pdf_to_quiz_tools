@@ -27,6 +27,7 @@ import {
 import { pdfAPI, quizAPI, PDFDocument, Quiz } from "@/lib/api";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
+import { FAQ } from "@/components/FAQ";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -34,6 +35,114 @@ export default function Dashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("quizzes");
+
+  // Structured Data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#organization",
+        "name": "PDF to Quiz Tools",
+        "url": "https://pdf-to-quiz-tools-v2.vercel.app",
+        "logo": "https://pdf-to-quiz-tools-v2.vercel.app/images/pdf-conversion-illustration.png",
+        "description": "Công cụ AI chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác. Tạo quiz từ PDF, Word, PowerPoint với nhiều loại câu hỏi khác nhau.",
+        "sameAs": []
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#webapp",
+        "name": "PDF to Quiz Tools",
+        "url": "https://pdf-to-quiz-tools-v2.vercel.app",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Công cụ AI miễn phí chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác. Tạo quiz từ PDF, Word, PowerPoint với nhiều loại câu hỏi khác nhau.",
+        "featureList": [
+          "Chuyển PDF thành quiz",
+          "Tạo quiz từ Word và PowerPoint",
+          "Nhiều loại câu hỏi (trắc nghiệm, tự luận)",
+          "AI tự động tạo câu hỏi",
+          "Miễn phí và dễ sử dụng"
+        ],
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "softwareVersion": "2.0"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#website",
+        "url": "https://pdf-to-quiz-tools-v2.vercel.app",
+        "name": "PDF to Quiz Tools",
+        "description": "Công cụ AI chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác",
+        "publisher": {
+          "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#organization"
+        },
+        "inLanguage": "vi-VN",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://pdf-to-quiz-tools-v2.vercel.app/?search={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Trang chủ",
+            "item": "https://pdf-to-quiz-tools-v2.vercel.app/"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://pdf-to-quiz-tools-v2.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Làm thế nào để chuyển PDF thành quiz?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bạn chỉ cần upload file PDF lên website, chọn loại câu hỏi bạn muốn tạo (trắc nghiệm, tự luận, v.v.), và AI sẽ tự động phân tích PDF và tạo quiz cho bạn trong vài giây."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Có mất phí không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hoàn toàn miễn phí! Bạn có thể sử dụng tất cả các tính năng mà không cần trả phí."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Hỗ trợ những loại file nào?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hiện tại chúng tôi hỗ trợ file PDF. Trong tương lai sẽ hỗ trợ thêm Word, PowerPoint và các định dạng khác."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Có thể tạo bao nhiêu loại câu hỏi?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bạn có thể tạo nhiều loại câu hỏi khác nhau: trắc nghiệm (multiple choice), tự luận (essay), điền vào chỗ trống, và nhiều loại khác."
+            }
+          }
+        ]
+      }
+    ]
+  };
 
   useEffect(() => {
     loadData();
@@ -170,28 +279,67 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background py-12 px-4 ">
       <SEO
-        title="Dashboard - Quản lý PDFs và Quizzes | PDF to Quiz Tools"
-        description="Quản lý tất cả PDFs và Quizzes của bạn. Upload PDF, tạo quiz từ PDF, và quản lý bài kiểm tra của bạn."
-        keywords="dashboard, quản lý quiz, quản lý PDF, PDF to quiz dashboard"
+        title="PDF to Quiz Tools - Chuyển PDF thành Bài Kiểm Tra Trắc Nghiệm"
+        description="Công cụ AI chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác. Tạo quiz từ PDF, Word, PowerPoint với nhiều loại câu hỏi khác nhau. Miễn phí và dễ sử dụng."
+        keywords="PDF to quiz, chuyển PDF thành quiz, tạo bài kiểm tra từ PDF, AI quiz generator, PDF to test, trắc nghiệm từ PDF, quiz maker, đề thi từ PDF"
         url={typeof window !== "undefined" ? window.location.href : ""}
-        structuredData={{
-          "@context": "https://schema.org",
-          "@type": "WebApplication",
-          "name": "PDF to Quiz Tools Dashboard",
-          "description": "Quản lý PDFs và Quizzes",
-          "applicationCategory": "EducationalApplication",
-          "operatingSystem": "Web",
-        }}
+        structuredData={structuredData}
       />
       <div className="container max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-          <p className="text-muted-foreground text-lg">
-            Quản lý PDFs và Quizzes của bạn
+        {/* Hero Section với H1 cho SEO */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            PDF to Quiz Tools
+          </h1>
+          <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+            Chuyển đổi PDF thành bài kiểm tra trắc nghiệm với AI. Tạo quiz từ PDF, Word, PowerPoint một cách nhanh chóng và dễ dàng.
           </p>
         </div>
 
-        <div className="mb-6 flex gap-4 flex-wrap">
+        {/* Features Section với H2 */}
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">Tính Năng Nổi Bật</h2>
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-primary" />
+                  Upload Dễ Dàng
+                </CardTitle>
+                <CardDescription>
+                  Tải lên PDF và để AI tự động tạo quiz cho bạn
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  AI Thông Minh
+                </CardTitle>
+                <CardDescription>
+                  Sử dụng AI để tạo câu hỏi chất lượng cao tự động
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  Nhiều Loại Câu Hỏi
+                </CardTitle>
+                <CardDescription>
+                  Hỗ trợ trắc nghiệm, tự luận và nhiều định dạng khác
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Bắt Đầu Ngay</h2>
+          <div className="mb-6 flex gap-4 flex-wrap">
           <Button onClick={() => setLocation("/upload")} size="lg">
             <Upload className="w-4 h-4 mr-2" />
             Upload PDF
@@ -413,6 +561,9 @@ export default function Dashboard() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* FAQ Section */}
+        <FAQ />
       </div>
     </div>
   );

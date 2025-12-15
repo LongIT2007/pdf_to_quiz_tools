@@ -17,6 +17,9 @@ export default function handler(req: any, res: any) {
     for (const sitemapPath of possiblePaths) {
       try {
         sitemapContent = readFileSync(sitemapPath, "utf-8");
+        // Remove any script tags that might have been injected
+        sitemapContent = sitemapContent.replace(/<script[^>]*>.*?<\/script>/gis, '');
+        sitemapContent = sitemapContent.replace(/<script[^>]*\/>/gi, '');
         // Update lastmod dates to current date
         sitemapContent = sitemapContent.replace(
           /<lastmod>[\d-]+<\/lastmod>/g,
@@ -68,9 +71,17 @@ export default function handler(req: any, res: any) {
 </urlset>`;
     }
     
-    // Set proper headers for XML response
+    // Clean up any remaining script tags or HTML
+    sitemapContent = sitemapContent.replace(/<script[^>]*>.*?<\/script>/gis, '');
+    sitemapContent = sitemapContent.replace(/<script[^>]*\/>/gi, '');
+    
+    // Set proper headers for XML response - CRITICAL for Google
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    // Prevent any HTML injection
+    res.setHeader("X-Robots-Tag", "noindex");
+    
     res.status(200).send(sitemapContent);
   } catch (error) {
     console.error("Error serving sitemap.xml:", error);
@@ -86,6 +97,7 @@ export default function handler(req: any, res: any) {
   </url>
 </urlset>`;
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader("X-Content-Type-Options", "nosniff");
     res.status(200).send(fallbackSitemap);
   }
 }
