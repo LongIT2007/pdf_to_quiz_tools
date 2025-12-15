@@ -373,6 +373,7 @@ export default function Dashboard() {
               Quiz Ngẫu Nhiên
             </Button>
           )}
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
