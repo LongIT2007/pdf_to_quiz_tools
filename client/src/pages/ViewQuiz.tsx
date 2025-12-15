@@ -151,8 +151,6 @@ export default function ViewQuiz(props: ViewQuizProps) {
       container.className = 'zoomable-image-container relative overflow-hidden rounded-md border bg-gray-50';
       const isMobile = window.innerWidth < 640;
       container.style.cssText = `
-        min-height: ${isMobile ? '200px' : '100px'};
-        max-height: ${isMobile ? '80vh' : '600px'};
         cursor: default;
         position: relative;
       `;
