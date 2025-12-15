@@ -652,7 +652,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {index + 1}
                   </span>
                   <div
-                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-full sm:[&_img]:w-auto [&_img]:max-h-[70vh] sm:[&_img]:max-h-96 [&_img]:block [&_img]:my-2 [&_img]:object-contain"
+                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-auto [&_img]:block [&_img]:my-2"
                     dangerouslySetInnerHTML={{
                       __html: ensureAbsoluteImageUrls(question.question),
                     }}
@@ -665,12 +665,11 @@ export default function ViewQuiz(props: ViewQuizProps) {
               <CardContent className="space-y-4">
                 {/* Display image if available */}
                 {question.imageUrl && (
-                  <div className="mb-4 -mx-4 sm:mx-0">
+                  <div className="mb-4">
                     <img
                       src={question.imageUrl}
                       alt="Question"
-                      className="w-full sm:w-auto max-w-full sm:max-w-2xl max-h-[70vh] sm:max-h-96 h-auto object-contain rounded-md border"
-                      loading="lazy"
+                      className="max-w-full w-auto h-auto object-contain rounded-md border"
                     />
                   </div>
                 )}

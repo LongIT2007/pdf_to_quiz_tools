@@ -518,12 +518,11 @@ export default function EditorQuiz(props?: EditorQuizProps) {
                 <div className="space-y-2">
                   <Label>Hình ảnh (tùy chọn)</Label>
                   {question.imageUrl ? (
-                    <div className="relative inline-block w-full sm:w-auto">
+                    <div className="relative inline-block">
                       <img
                         src={question.imageUrl}
                         alt="Question"
-                        className="w-full sm:w-auto max-w-full sm:max-w-2xl max-h-[60vh] sm:max-h-64 h-auto object-contain rounded-md border"
-                        loading="lazy"
+                        className="max-w-full max-h-64 rounded-md border"
                       />
                       <Button
                         variant="destructive"

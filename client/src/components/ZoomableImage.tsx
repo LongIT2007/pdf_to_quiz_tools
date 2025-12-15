@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ZoomIn, ZoomOut, X } from "lucide-react";
@@ -27,16 +27,6 @@ export function ZoomableImage({
   const imageRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -79,8 +69,8 @@ export function ZoomableImage({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         style={{
-          minHeight: "250px",
-          maxHeight: isMobile ? "80vh" : "600px", // To hơn trên mobile
+          minHeight: "200px",
+          maxHeight: "600px",
           cursor: zoomLevel > 100 ? (isDragging ? "grabbing" : "grab") : "default",
         }}
       >
@@ -90,16 +80,16 @@ export function ZoomableImage({
             transform: `scale(${zoomLevel / 100}) translate(${position.x / (zoomLevel / 100)}px, ${position.y / (zoomLevel / 100)}px)`,
             transformOrigin: "center",
             transition: isDragging ? "none" : "transform 0.2s",
-            minHeight: "250px",
+            minHeight: "200px",
           }}
         >
           <img
             src={src}
             alt={alt}
-            className="max-w-full w-full sm:w-auto max-h-[70vh] sm:max-h-96 object-contain select-none"
+            className="max-w-full max-h-96 object-contain select-none"
             draggable={false}
             style={{
-              width: isMobile ? "100%" : "auto",
+              width: "auto",
               height: "auto",
             }}
           />
