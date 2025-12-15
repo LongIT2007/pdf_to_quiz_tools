@@ -388,7 +388,7 @@ export default function Dashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:grid-cols-none">
+          <TabsList className="w-full sm:w-auto grid grid-cols-2 p-0">
             <TabsTrigger value="quizzes" className="text-sm sm:text-base">
               <BookOpen className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Quizzes</span>

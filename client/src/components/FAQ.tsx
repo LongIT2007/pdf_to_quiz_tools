@@ -44,7 +44,7 @@ const faqData = [
 
 export function FAQ() {
   return (
-    <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 bg-muted/50">
+    <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 bg-muted/50 mt-8">
       <div className="container max-w-4xl mx-auto">
         <div className="text-center mb-6 sm:mb-8">
           <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
