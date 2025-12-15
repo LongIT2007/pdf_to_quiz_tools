@@ -3,6 +3,9 @@ import { join } from "path";
 
 export default function handler(req: any, res: any) {
   try {
+    // Get current date for lastmod
+    const currentDate = new Date().toISOString().split('T')[0];
+    
     // Try multiple possible paths
     const possiblePaths = [
       join(process.cwd(), "client", "public", "sitemap.xml"),
@@ -14,14 +17,19 @@ export default function handler(req: any, res: any) {
     for (const sitemapPath of possiblePaths) {
       try {
         sitemapContent = readFileSync(sitemapPath, "utf-8");
+        // Update lastmod dates to current date
+        sitemapContent = sitemapContent.replace(
+          /<lastmod>[\d-]+<\/lastmod>/g,
+          `<lastmod>${currentDate}</lastmod>`
+        );
         break;
       } catch (e) {
         // Try next path
       }
     }
     
+    // Fallback: return hardcoded sitemap (always available)
     if (!sitemapContent) {
-      // Fallback: return hardcoded sitemap
       sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -29,43 +37,56 @@ export default function handler(req: any, res: any) {
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/quizzes</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload/smart</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/quiz/editor</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>`;
     }
     
+    // Set proper headers for XML response
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
     res.status(200).send(sitemapContent);
   } catch (error) {
     console.error("Error serving sitemap.xml:", error);
-    res.status(500).send("Error loading sitemap");
+    // Even on error, return a basic sitemap
+    const currentDate = new Date().toISOString().split('T')[0];
+    const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.status(200).send(fallbackSitemap);
   }
 }
 

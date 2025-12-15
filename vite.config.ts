@@ -25,7 +25,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+    copyPublicDir: true,
   },
+  publicDir: path.resolve(__dirname, "client", "public"),
   server: {
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy

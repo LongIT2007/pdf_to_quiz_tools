@@ -7,7 +7,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>2024-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,7 +15,7 @@
   <!-- Dashboard -->
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/quizzes</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>2024-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -23,7 +23,7 @@
   <!-- Upload PDF -->
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>2024-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -31,7 +31,7 @@
   <!-- Smart Upload -->
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload/smart</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>2024-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -39,7 +39,7 @@
   <!-- Quiz Editor -->
   <url>
     <loc>https://pdf-to-quiz-tools-v2.vercel.app/quiz/editor</loc>
-    <lastmod>2024-12-19</lastmod>
+    <lastmod>2024-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
