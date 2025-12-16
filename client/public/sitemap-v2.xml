@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  
+  <!-- Homepage - Highest Priority -->
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Dashboard Pages -->
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/quizzes</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/pdfs</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Upload Features -->
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/upload/smart</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Quiz Creation Pages -->
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/quiz/create</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://pdf-to-quiz-tools-v2.vercel.app/quiz/smart-create</loc>
+    <lastmod>2024-12-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Note: Dynamic quiz pages (/quiz/:id) should be added programmatically 
+       if they are public quizzes. Private quizzes should NOT be indexed. -->
+  
+</urlset>
