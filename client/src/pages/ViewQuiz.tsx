@@ -514,7 +514,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 relative">
+      <div className="min-h-screen bg-background py-12 px-4 relative overflow-x-hidden">
       {/* Drawing Toolbar */}
       {!showResults && (
         <DrawingToolbar
@@ -547,7 +547,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
         />
       )}
       
-      <div className="container max-w-4xl mx-auto relative" ref={quizContainerRef}>
+      <div className="container max-w-4xl mx-auto relative overflow-x-hidden" ref={quizContainerRef}>
         {/* Drawing Canvas Overlay - inside container to scroll with content */}
         {!showResults && drawingEnabled && (
           <DrawingCanvas
@@ -558,26 +558,29 @@ export default function ViewQuiz(props: ViewQuizProps) {
             containerRef={quizContainerRef}
           />
         )}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => setLocation("/quizzes")}>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <Button variant="ghost" onClick={() => setLocation("/quizzes")} className="flex-shrink-0">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại
+            <span className="hidden sm:inline">Quay lại</span>
+            <span className="sm:hidden">Quay</span>
           </Button>
           <Button
             onClick={() => setLocation(`/quiz/editor/${quiz.id}`)}
             variant="outline"
+            className="flex-shrink-0"
           >
             <Edit className="w-4 h-4 mr-2" />
-            Chỉnh sửa
+            <span className="hidden sm:inline">Chỉnh sửa</span>
+            <span className="sm:hidden">Sửa</span>
           </Button>
         </div>
 
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xs md:text-xl xl:text-4xl font-bold mb-2">{quiz.title}</h1>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 break-words overflow-wrap-anywhere">{quiz.title}</h1>
               {quiz.description && (
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-base sm:text-lg break-words overflow-wrap-anywhere">
                   {quiz.description}
                 </p>
               )}
@@ -650,7 +653,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                     {index + 1}
                   </span>
                   <div
-                    className="flex-1 prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:w-auto [&_img]:block [&_img]:my-2"
+                    className="flex-1 prose prose-sm max-w-none break-words overflow-wrap-anywhere [&_img]:max-w-full [&_img]:h-auto [&_img]:w-auto [&_img]:block [&_img]:my-2 [&_*]:max-w-full [&_*]:overflow-x-auto"
                     dangerouslySetInnerHTML={{
                       __html: ensureAbsoluteImageUrls(question.question),
                     }}
@@ -686,7 +689,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                         <Button
                           key={optIndex}
                           variant={isSelected ? "default" : "outline"}
-                          className="w-full justify-start text-left h-auto py-3"
+                          className="w-full justify-start text-left h-auto py-3 break-words overflow-wrap-anywhere whitespace-normal"
                           onClick={() =>
                             handleAnswerSelect(question.id, optIndex)
                           }
@@ -696,7 +699,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
                             <span className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center font-semibold">
                               {String.fromCharCode(65 + optIndex)}
                             </span>
-                            <span className="flex-1">{option}</span>
+                            <span className="flex-1 min-w-0 break-words overflow-wrap-anywhere">{option}</span>
                             {showCorrect && (
                               <CheckCircle2 className="w-5 h-5 text-green-600" />
                             )}

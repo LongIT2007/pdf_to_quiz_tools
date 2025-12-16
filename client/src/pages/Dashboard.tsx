@@ -277,7 +277,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8 md:py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-background py-6 sm:py-8 md:py-12 px-4 sm:px-6 overflow-x-hidden">
       <SEO
         title="PDF to Quiz Tools - Chuyển PDF thành Bài Kiểm Tra Trắc Nghiệm"
         description="Công cụ AI chuyển đổi PDF thành bài kiểm tra trắc nghiệm tương tác. Tạo quiz từ PDF, Word, PowerPoint với nhiều loại câu hỏi khác nhau. Miễn phí và dễ sử dụng."

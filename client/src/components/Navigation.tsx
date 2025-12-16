@@ -29,14 +29,14 @@ export default function Navigation() {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-2">
           {/* Logo */}
           <div 
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity min-w-0 flex-shrink"
             onClick={() => setLocation("/")}
           >
-            <FileText className="w-6 h-6 text-primary" />
-            <span className="text-lg sm:text-xl font-bold">PDF to Quiz</span>
+            <FileText className="w-6 h-6 text-primary flex-shrink-0" />
+            <span className="text-lg sm:text-xl font-bold truncate">PDF to Quiz</span>
           </div>
 
           {/* Desktop Navigation */}
