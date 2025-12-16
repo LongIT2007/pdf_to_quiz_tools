@@ -575,7 +575,7 @@ export default function ViewQuiz(props: ViewQuizProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-xs md:text-xl xl:text-4xl font-bold mb-2">{quiz.title}</h1>
+              <h1 className="text-2xs md:text-xl xl:text-4xl font-bold mb-2">{quiz.title}</h1>
               {quiz.description && (
                 <p className="text-muted-foreground text-lg">
                   {quiz.description}
